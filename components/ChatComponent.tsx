@@ -14,6 +14,17 @@ const ChatComponent: React.FC = () => {
   const [gameStarted, setGameStarted] = useState<boolean>(false);
   const [currentTurn, setCurrentTurn] = useState<number>(1); // Track the current turn
 
+  const role = "investor"; // Future-proofing for dynamic role changes
+
+  // Handle initial investor sentence based on language selection
+  const getInitialSentence = () => {
+    if (language === "German") {
+      return "Hallo, schön dich zu treffen! Kannst du mir etwas über dein Produkt erzählen?";
+    } else {
+      return "Hello, it's great to meet you! Can you tell me about your product?";
+    }
+  };
+
   const handleStartGame = async () => {
     setLoading(true);
     setGameStarted(true); // Allow message input after Play is clicked
@@ -22,15 +33,22 @@ const ChatComponent: React.FC = () => {
       apiKey: process.env.NEXT_PUBLIC_MISTRAL_API_KEY as string,
     });
 
-    // Investor starts the conversation
+    // Investor starts the conversation based on selected language
     const initialPrompt = `
-      Language Learning Game: Investor & Founder Simulation
+      You are a ${role}, and I am a developer seeking investment for my product.
+      We will exchange sentences in ${language} at an ${languageLevel} level, over ${turns} turns.
+      At the last turn, you will decide if I get the investment. 
 
-      Welcome! You will play the role of a software developer meeting an investor to discuss your product.
-      
-      The language is set to ${language}, the level is ${languageLevel}, and you will play for ${turns} turns.
+      Your responses should be formatted as JSON without any additional fields:
+      {
+        "answer": "string",
+        "decision": "string"
+      }
 
-      Investor: "Hello, it's great to meet you! Can you start by telling me what your product is all about?"
+      Until the final turn, "decision" should always be null. On the last turn, "decision" can be either "winning" or "losing."
+
+      Let's start:
+      ${role}: "${getInitialSentence()}"
     `;
 
     setConversationHistory(initialPrompt); // Set the initial conversation history
@@ -44,7 +62,7 @@ const ChatComponent: React.FC = () => {
       if (chatResponse && chatResponse.choices && chatResponse.choices.length > 0) {
         const responseContent = chatResponse.choices[0].message.content || "No content in the response.";
         setResponse(responseContent); // Set the initial response from the investor
-        setConversationHistory(initialPrompt + `\nInvestor: "${responseContent}"`); // Update conversation history
+        setConversationHistory(initialPrompt + `\n${role}: "${responseContent}"`); // Update conversation history
       } else {
         setResponse("No response from the AI.");
       }
