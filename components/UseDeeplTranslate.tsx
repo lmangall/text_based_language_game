@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { TargetLanguageCode } from "deepl-node";
 
 const useDeeplTranslate = () => {
   const [translations, setTranslations] = useState<string[]>([]);
@@ -6,8 +7,8 @@ const useDeeplTranslate = () => {
 
   const apiKey = process.env.DEEPL;
 
-  // Hardcoded German target language code
-  const targetLang: deepl.TargetLanguageCode = "de";
+  // Hardcoded target language
+  const targetLang: TargetLanguageCode = "de";
 
   const translateText = async (text: string) => {
     if (!apiKey) {
@@ -33,7 +34,7 @@ const useDeeplTranslate = () => {
       }
 
       const data = await response.json();
-      const translatedText = data.translations[0].text; // Get the translated text
+      const translatedText = data.translations[0].text;
       const formattedTranslation = `<strong>${text}</strong>: ${translatedText}`;
       setTranslations((prev) => [...prev, formattedTranslation]);
     } catch (error) {
