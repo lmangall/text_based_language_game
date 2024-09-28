@@ -1,5 +1,3 @@
-// components/ChatComponent.tsx
-
 "use client";
 
 import { useState } from "react";
@@ -9,23 +7,44 @@ const ChatComponent: React.FC = () => {
   const [message, setMessage] = useState<string>("");
   const [response, setResponse] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
+  const [language, setLanguage] = useState<string>("English");
+  const [languageLevel, setLanguageLevel] = useState<string>("A1");
+  const [turns, setTurns] = useState<number>(5); // Default number of turns
+  const [conversationHistory, setConversationHistory] = useState<string>("");
+  const [gameStarted, setGameStarted] = useState<boolean>(false);
+  const [currentTurn, setCurrentTurn] = useState<number>(1); // Track the current turn
 
-  const handleSendMessage = async () => {
+  const handleStartGame = async () => {
     setLoading(true);
+    setGameStarted(true); // Allow message input after Play is clicked
 
     const client = new Mistral({
       apiKey: process.env.NEXT_PUBLIC_MISTRAL_API_KEY as string,
     });
 
+    // Investor starts the conversation
+    const initialPrompt = `
+      Language Learning Game: Investor & Founder Simulation
+
+      Welcome! You will play the role of a software developer meeting an investor to discuss your product.
+      
+      The language is set to ${language}, the level is ${languageLevel}, and you will play for ${turns} turns.
+
+      Investor: "Hello, it's great to meet you! Can you start by telling me what your product is all about?"
+    `;
+
+    setConversationHistory(initialPrompt); // Set the initial conversation history
+
     try {
       const chatResponse = await client.chat.complete({
         model: "mistral-large-latest",
-        messages: [{ role: "user", content: message }],
+        messages: [{ role: "system", content: initialPrompt }],
       });
 
       if (chatResponse && chatResponse.choices && chatResponse.choices.length > 0) {
         const responseContent = chatResponse.choices[0].message.content || "No content in the response.";
-        setResponse(responseContent); // Ensure response is always a string
+        setResponse(responseContent); // Set the initial response from the investor
+        setConversationHistory(initialPrompt + `\nInvestor: "${responseContent}"`); // Update conversation history
       } else {
         setResponse("No response from the AI.");
       }
@@ -37,85 +56,139 @@ const ChatComponent: React.FC = () => {
     setLoading(false);
   };
 
+  const handleSendMessage = async () => {
+    if (currentTurn > turns) {
+      setResponse("Game Over. You have reached the maximum number of turns.");
+      return;
+    }
+
+    setLoading(true);
+
+    const client = new Mistral({
+      apiKey: process.env.NEXT_PUBLIC_MISTRAL_API_KEY as string,
+    });
+
+    const updatedHistory = conversationHistory + `\nUser: "${message}"`;
+
+    try {
+      const chatResponse = await client.chat.complete({
+        model: "mistral-large-latest",
+        messages: [
+          { role: "system", content: updatedHistory }, // Pass conversation history
+          { role: "user", content: message }, // User's latest input
+        ],
+      });
+
+      if (chatResponse && chatResponse.choices && chatResponse.choices.length > 0) {
+        const responseContent = chatResponse.choices[0].message.content || "No content in the response.";
+        setResponse(responseContent); // Set response from the investor
+        setConversationHistory(updatedHistory + `\nInvestor: "${responseContent}"`); // Update history
+        setCurrentTurn(currentTurn + 1); // Move to the next turn
+      } else {
+        setResponse("No response from the AI.");
+      }
+    } catch (error) {
+      console.error("Error fetching response:", error);
+      setResponse("Something went wrong. Please try again.");
+    }
+
+    setLoading(false);
+    setMessage(""); // Clear input after sending
+  };
+
   return (
     <div className="max-w-lg mx-auto p-6 bg-gray-100 rounded-lg shadow-lg">
-      <h1 className="text-2xl font-bold text-center text-gray-800 mb-4">Chat with Mistral AI</h1>
-      <textarea
-        value={message}
-        onChange={(e) => setMessage(e.target.value)}
-        placeholder="Type your message here..."
-        rows={4}
-        className="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 mb-4"
-      />
-      <button
-        onClick={handleSendMessage}
-        disabled={loading}
-        className={`w-full bg-blue-500 text-white py-2 rounded-lg font-semibold ${
-          loading ? "cursor-not-allowed opacity-50" : "hover:bg-blue-600"
-        }`}
-      >
-        {loading ? "Sending..." : "Send"}
-      </button>
-      {response && (
-        <div className="mt-6 p-4 border border-gray-300 rounded-lg bg-white">
-          <h2 className="text-lg font-semibold text-gray-800">Assistant&#39;s Response:</h2>
-          <p className="mt-2 text-gray-700">{response}</p>
-        </div>
+      <h1 className="text-2xl font-bold text-center text-gray-800 mb-4">Investor-Developer Dialogue Simulation</h1>
+
+      {/* Language, Level, and Number of Turns selection (shown only before the game starts) */}
+      {!gameStarted && (
+        <>
+          <div className="mb-4">
+            <label className="block text-gray-700 font-bold mb-2">Language</label>
+            <select
+              value={language}
+              onChange={(e) => setLanguage(e.target.value)}
+              className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+            >
+              <option value="English">English</option>
+              <option value="German">German</option>
+            </select>
+          </div>
+
+          <div className="mb-4">
+            <label className="block text-gray-700 font-bold mb-2">Language Level</label>
+            <select
+              value={languageLevel}
+              onChange={(e) => setLanguageLevel(e.target.value)}
+              className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+            >
+              <option value="A1">A1 (Beginner)</option>
+              <option value="A2">A2 (Elementary)</option>
+              <option value="B1">B1 (Intermediate)</option>
+              <option value="B2">B2 (Upper Intermediate)</option>
+              <option value="C1">C1 (Advanced)</option>
+              <option value="C2">C2 (Proficient)</option>
+            </select>
+          </div>
+
+          <div className="mb-4">
+            <label className="block text-gray-700 font-bold mb-2">Number of Turns</label>
+            <input
+              type="number"
+              value={turns}
+              onChange={(e) => setTurns(Number(e.target.value))}
+              className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+              min="1"
+              max="20"
+            />
+          </div>
+
+          {/* Play button to start the game */}
+          <button
+            onClick={handleStartGame}
+            disabled={loading}
+            className={`w-full bg-green-500 text-white py-2 rounded-lg font-semibold ${
+              loading ? "cursor-not-allowed opacity-50" : "hover:bg-green-600"
+            }`}
+          >
+            {loading ? "Starting..." : "Play"}
+          </button>
+        </>
+      )}
+
+      {/* After game starts, display the conversation and enable the input field */}
+      {gameStarted && (
+        <>
+          <div className="mt-6 p-4 border border-gray-300 rounded-lg bg-white">
+            <h2 className="text-lg font-semibold text-gray-800">Investor&#39;s Response:</h2>
+            <p className="mt-2 text-gray-700">{response}</p>
+            <p className="mt-2 text-gray-500">
+              Turn {currentTurn}/{turns}
+            </p>
+          </div>
+
+          <textarea
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            placeholder="Type your response here..."
+            rows={4}
+            className="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 mb-4"
+            disabled={loading || currentTurn > turns}
+          />
+
+          <button
+            onClick={handleSendMessage}
+            disabled={loading || !message || currentTurn > turns}
+            className={`w-full bg-blue-500 text-white py-2 rounded-lg font-semibold ${
+              loading || !message || currentTurn > turns ? "cursor-not-allowed opacity-50" : "hover:bg-blue-600"
+            }`}
+          >
+            {loading ? "Sending..." : currentTurn > turns ? "Game Over" : "Send"}
+          </button>
+        </>
       )}
     </div>
   );
 };
-
-// const ChatComponent: React.FC = () => {
-//   const [message, setMessage] = useState<string>("");
-//   const [response, setResponse] = useState<string>("");
-//   const [loading, setLoading] = useState<boolean>(false);
-
-//   const handleSendMessage = async () => {
-//     setLoading(true);
-
-//     // Initialize Mistral client
-//     const client = new Mistral({
-//       apiKey: process.env.NEXT_PUBLIC_MISTRAL_API_KEY as string, // Safe cast API key to string
-//     });
-
-//     try {
-//       const chatResponse = await client.chat.complete({
-//         model: "mistral-large-latest",
-//         messages: [{ role: "user", content: message }],
-//       });
-
-//       setResponse(chatResponse.choices[0].message.content);
-//     } catch (error) {
-//       console.error("Error fetching response:", error);
-//       setResponse("Something went wrong. Please try again.");
-//     }
-
-//     setLoading(false);
-//   };
-
-//   return (
-//     <div>
-//       <h1>Chat with Mistral AI</h1>
-//       <textarea
-//         value={message}
-//         onChange={(e) => setMessage(e.target.value)}
-//         placeholder="Type your message here..."
-//         rows={4}
-//         cols={50}
-//       />
-//       <br />
-//       <button onClick={handleSendMessage} disabled={loading}>
-//         {loading ? "Sending..." : "Send"}
-//       </button>
-//       {response && (
-//         <div>
-//           <h2>Assistant's Response:</h2>
-//           <p>{response}</p>
-//         </div>
-//       )}
-//     </div>
-//   );
-// };
 
 export default ChatComponent;
