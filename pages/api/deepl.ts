@@ -4,10 +4,13 @@ import * as deepl from "deepl-node";
 export async function POST(req: NextRequest) {
   const { text, targetLang = "EN-US" } = await req.json();
 
+  console.log("Received text:", text); // Log the received text
+  console.log("Target language:", targetLang); // Log the target language
+
   const apiKey = process.env.DEEPL;
   if (!apiKey) {
     return NextResponse.json(
-      { error: "DEEPL_API_KEY environment variable not defined" },
+      { error: "DEEPL environment variable not defined" },
       { status: 500 }
     );
   }
@@ -26,8 +29,19 @@ export async function POST(req: NextRequest) {
       : result.text;
 
     return NextResponse.json({ translatedText });
-  } catch (error) {
-    console.error("Translation error:", error);
-    return NextResponse.json({ error: "Translation failed." }, { status: 500 });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error("Translation error:", error); // Log the entire error object
+      return NextResponse.json(
+        { error: "Translation failed.", details: error.message },
+        { status: 500 }
+      );
+    } else {
+      console.error("Unknown error:", error);
+      return NextResponse.json(
+        { error: "Translation failed.", details: "Unknown error occurred." },
+        { status: 500 }
+      );
+    }
   }
 }
