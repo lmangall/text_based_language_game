@@ -1,15 +1,30 @@
 "use client";
-// import GameOne from "./components/GameOne";
-// import ChatComponent from "./components/ChatComponent";
-// import GameTwo from "./components/GameTwo";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import ChatComponent from "@/components/ChatComponent";
+import UseDeeplTranslate from "@/components/UseDeeplTranslate";
 
 export default function Home() {
   const [showChat, setShowChat] = useState(false);
   const handlePlayClick = () => {
     setShowChat(true);
+  };
+
+  const { translateText, translations, translationError } = UseDeeplTranslate();
+
+  const handleTextSelection = async () => {
+    const selection = window.getSelection();
+    if (!selection || !selection.toString()) {
+      return;
+    }
+
+    const text = selection.toString();
+
+    try {
+      await translateText(text);
+    } catch (error) {
+      console.error("Translation error:", error);
+    }
   };
 
   return (
@@ -24,6 +39,23 @@ export default function Home() {
             <Button variant="outline" onClick={handlePlayClick}>
               Play
             </Button>
+          )}
+          <div
+            className="bg-white w-full h-full max-h-80 bg-opacity-40 p-4 text-base font-normal border-2 border-gray-300 rounded-lg shadow-sm resize-none overflow-auto"
+            aria-readonly="true"
+            onMouseUp={handleTextSelection}
+          >
+            Un peu de texte pour tester la traduction (text to translate)
+          </div>
+          {translations.length > 0 && (
+            <ul>
+              {translations.map((translation) => (
+                <li key={translation}>{translation}</li>
+              ))}
+            </ul>
+          )}
+          {translationError && (
+            <p className="text-red-500">{translationError}</p>
           )}
         </main>
         <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
