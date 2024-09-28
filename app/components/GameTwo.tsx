@@ -1,4 +1,4 @@
-"use client"; // Ensure this component runs on the client
+"use client";
 
 import { useState } from "react";
 
