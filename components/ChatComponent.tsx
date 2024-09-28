@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Mistral } from "@mistralai/mistralai";
+import { marked } from "marked"; // Import marked
 
 const ChatComponent: React.FC = () => {
   const [message, setMessage] = useState<string>("");
@@ -87,7 +88,7 @@ You, as the ${aiRole}: "${getInitialSentence()}"
         }
         // Extract only the 'answer' from the parsed JSON
         const responseContent = parsedResponse?.answer || "No content in the response.";
-        setResponse(responseContent); // Set the initial response from the investor
+        setResponse(responseContent); // Set the initial response from the AI
         setConversationHistory(initialPrompt + `\n${aiRole}: "${responseContent}"`); // Update conversation history
       } else {
         setResponse("No response from the AI.");
@@ -166,9 +167,54 @@ You, as the ${aiRole}: "${getInitialSentence()}"
     setMessage(""); // Clear input after sending
   };
 
+  const handleRequestFeedback = async () => {
+    setLoading(true);
+
+    const client = new Mistral({
+      apiKey: process.env.NEXT_PUBLIC_MISTRAL_API_KEY as string,
+    });
+
+    const feedbackPrompt = `
+	Please assess the following conversation between a ${userRole} and an ${aiRole}, focusing solely on the ${userRole}'s responses.
+	Analyze the ${userRole}'s responses for grammar, sentence structure, and vocabulary usage, and provide suggestions on how they can improve their language skills.
+  
+	Only provide feedback on the responses of the ${userRole}.
+  
+	Conversation history:
+	${conversationHistory}
+  `;
+
+    try {
+      const feedbackResponse = await client.chat.complete({
+        model: "mistral-large-latest",
+        messages: [{ role: "system", content: feedbackPrompt }],
+      });
+
+      if (feedbackResponse && feedbackResponse.choices && feedbackResponse.choices.length > 0) {
+        const markdownContent = feedbackResponse.choices[0].message.content || "No feedback available.";
+
+        // Use await if marked is asynchronous
+        const htmlContent = await marked(markdownContent); // Await for Promise resolution
+
+        // Set the HTML content in the response state
+        setResponse(htmlContent);
+      } else {
+        setResponse("<p>No feedback available.</p>");
+      }
+    } catch (error) {
+      console.error("Error fetching feedback:", error);
+      setResponse("<p>Something went wrong. Please try again.</p>");
+    }
+
+    setLoading(false);
+  };
+
   return (
     <div className="max-w-lg mx-auto p-6 bg-gray-100 rounded-lg shadow-lg">
-      <h1 className="text-2xl font-bold text-center text-gray-800 mb-4">Investor-Developer Dialogue Simulation</h1>
+      <h1 className="text-2xl font-bold text-center text-gray-800 mb-4">
+        {`${aiRole.charAt(0).toUpperCase()}${aiRole.slice(1)}`} -{" "}
+        {`${userRole.charAt(0).toUpperCase()}${userRole.slice(1)}`} Dialogue Simulation
+      </h1>
 
       {/* Language, Level, and Number of Turns selection (shown only before the game starts) */}
       {!gameStarted && (
@@ -231,7 +277,11 @@ You, as the ${aiRole}: "${getInitialSentence()}"
         <>
           <div className="mt-6 p-4 border border-gray-300 rounded-lg bg-white">
             <h2 className="text-lg font-semibold text-gray-800">Investor&#39;s Response:</h2>
-            <p className="mt-2 text-gray-700">{response}</p>
+            {/* Render the HTML response safely */}
+            <div
+              className="mt-2 text-gray-700"
+              dangerouslySetInnerHTML={{ __html: response }} // Here is the fix to render HTML content
+            />
             <p className="mt-2 text-gray-500">
               Turn {currentTurn}/{turns}
             </p>
@@ -246,15 +296,28 @@ You, as the ${aiRole}: "${getInitialSentence()}"
             disabled={loading || currentTurn > turns}
           />
 
-          <button
-            onClick={handleSendMessage}
-            disabled={loading || !message || currentTurn > turns}
-            className={`w-full bg-blue-500 text-white py-2 rounded-lg font-semibold ${
-              loading || !message || currentTurn > turns ? "cursor-not-allowed opacity-50" : "hover:bg-blue-600"
-            }`}
-          >
-            {loading ? "Sending..." : currentTurn > turns ? "Game Over" : "Send"}
-          </button>
+          {/* If game is over, show Request Feedback button */}
+          {currentTurn > turns ? (
+            <button
+              onClick={handleRequestFeedback}
+              disabled={loading}
+              className={`w-full bg-purple-500 text-white py-2 rounded-lg font-semibold ${
+                loading ? "cursor-not-allowed opacity-50" : "hover:bg-purple-600"
+              }`}
+            >
+              {loading ? "Requesting Feedback..." : "Request Feedback"}
+            </button>
+          ) : (
+            <button
+              onClick={handleSendMessage}
+              disabled={loading || !message || currentTurn > turns}
+              className={`w-full bg-blue-500 text-white py-2 rounded-lg font-semibold ${
+                loading || !message || currentTurn > turns ? "cursor-not-allowed opacity-50" : "hover:bg-blue-600"
+              }`}
+            >
+              {loading ? "Sending..." : "Send"}
+            </button>
+          )}
 
           {/* Toggle Debug Mode Button */}
           <div className="mt-6">

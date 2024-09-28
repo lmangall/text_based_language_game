@@ -2,6 +2,10 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import ChatComponent from "@/components/ChatComponent";
+<<<<<<< Updated upstream
+=======
+// import ChatComponentTerminal from "@/components/ChatComponentTerminal";
+>>>>>>> Stashed changes
 import useDeeplTranslate from "@/components/UseDeeplTranslate";
 
 export default function Home() {
@@ -30,7 +34,12 @@ export default function Home() {
           {showChat ? (
             <ChatComponent />
           ) : (
+<<<<<<< Updated upstream
             <Button variant="outline" onClick={() => setShowChat(true)}>
+=======
+            // <ChatComponentTerminal />
+            <Button variant="outline" onClick={handlePlayClick}>
+>>>>>>> Stashed changes
               Play
             </Button>
           )}
@@ -44,6 +53,7 @@ export default function Home() {
 
           {/* Render translations here */}
           {translations.length > 0 && (
+<<<<<<< Updated upstream
             <div className="mt-4 w-full">
               <h2 className="font-bold">Translations:</h2>
               <ul className="list-disc pl-5">
@@ -60,11 +70,18 @@ export default function Home() {
           {translationError && (
             <p className="text-red-500">{translationError}</p>
           )}
+=======
+            <ul>
+              {translations.map((translation, index) => (
+                <li key={index} dangerouslySetInnerHTML={{ __html: translation }} />
+              ))}
+            </ul>
+          )}
+          {translationError && <p className="text-red-500">{translationError}</p>}
+>>>>>>> Stashed changes
         </main>
         <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-          <a className="flex items-center gap-2 hover:underline hover:underline-offset-4">
-            Learn
-          </a>
+          <a className="flex items-center gap-2 hover:underline hover:underline-offset-4">Learn</a>
           <a
             className="flex items-center gap-2 hover:underline hover:underline-offset-4"
             href="https://google.com"
