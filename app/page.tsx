@@ -6,11 +6,7 @@ import useDeeplTranslate from "@/components/useDeeplTranslate";
 
 export default function Home() {
   const [showChat, setShowChat] = useState(false);
-  const handlePlayClick = () => {
-    setShowChat(true);
-  };
-
-  const { translateText, translations, translationError } = useDeeplTranslate(); // Use the hook here
+  const { translateText, translations, translationError } = useDeeplTranslate();
 
   const handleTextSelection = async () => {
     const selection = window.getSelection();
@@ -34,7 +30,7 @@ export default function Home() {
           {showChat ? (
             <ChatComponent />
           ) : (
-            <Button variant="outline" onClick={handlePlayClick}>
+            <Button variant="outline" onClick={() => setShowChat(true)}>
               Play
             </Button>
           )}
@@ -45,16 +41,22 @@ export default function Home() {
           >
             Un peu de texte pour tester la traduction (text to translate)
           </div>
+
+          {/* Render translations here */}
           {translations.length > 0 && (
-            <ul>
-              {translations.map((translation, index) => (
-                <li
-                  key={index}
-                  dangerouslySetInnerHTML={{ __html: translation }}
-                />
-              ))}
-            </ul>
+            <div className="mt-4 w-full">
+              <h2 className="font-bold">Translations:</h2>
+              <ul className="list-disc pl-5">
+                {translations.map((translation, index) => (
+                  <li
+                    key={index}
+                    dangerouslySetInnerHTML={{ __html: translation }}
+                  />
+                ))}
+              </ul>
+            </div>
           )}
+
           {translationError && (
             <p className="text-red-500">{translationError}</p>
           )}

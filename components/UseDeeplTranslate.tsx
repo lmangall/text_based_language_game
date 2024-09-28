@@ -1,32 +1,17 @@
 import { useState } from "react";
-import { TargetLanguageCode } from "deepl-node";
 
 const useDeeplTranslate = () => {
   const [translations, setTranslations] = useState<string[]>([]);
   const [translationError, setTranslationError] = useState<string>("");
 
-  const apiKey = process.env.DEEPL;
-
-  // Hardcoded target language
-  const targetLang: TargetLanguageCode = "de";
-
   const translateText = async (text: string) => {
-    if (!apiKey) {
-      setTranslationError("DEEPL environment variable not defined");
-      return;
-    }
-
     try {
-      const response = await fetch("https://api-free.deepl.com/v2/translate", {
+      const response = await fetch("/api/deepl", {
         method: "POST",
         headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
+          "Content-Type": "application/json",
         },
-        body: new URLSearchParams({
-          auth_key: apiKey,
-          text: text,
-          target_lang: targetLang,
-        }).toString(),
+        body: JSON.stringify({ text }),
       });
 
       if (!response.ok) {
@@ -34,8 +19,12 @@ const useDeeplTranslate = () => {
       }
 
       const data = await response.json();
-      const translatedText = data.translations[0].text;
+      console.log("API Response:", data);
+      const translatedText = data.translations[0].text; // Get the translated text
       const formattedTranslation = `<strong>${text}</strong>: ${translatedText}`;
+
+      // Log translations to verify structure
+      console.log("Setting translations:", formattedTranslation);
       setTranslations((prev) => [...prev, formattedTranslation]);
     } catch (error) {
       console.error("Translation error:", error);
