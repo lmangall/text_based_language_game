@@ -23,7 +23,12 @@ const ChatComponent: React.FC = () => {
         messages: [{ role: "user", content: message }],
       });
 
-      setResponse(chatResponse.choices[0].message.content);
+      if (chatResponse && chatResponse.choices && chatResponse.choices.length > 0) {
+        const responseContent = chatResponse.choices[0].message.content || "No content in the response.";
+        setResponse(responseContent); // Ensure response is always a string
+      } else {
+        setResponse("No response from the AI.");
+      }
     } catch (error) {
       console.error("Error fetching response:", error);
       setResponse("Something went wrong. Please try again.");
@@ -53,7 +58,7 @@ const ChatComponent: React.FC = () => {
       </button>
       {response && (
         <div className="mt-6 p-4 border border-gray-300 rounded-lg bg-white">
-          <h2 className="text-lg font-semibold text-gray-800">Assistant's Response:</h2>
+          <h2 className="text-lg font-semibold text-gray-800">Assistant&#39;s Response:</h2>
           <p className="mt-2 text-gray-700">{response}</p>
         </div>
       )}
