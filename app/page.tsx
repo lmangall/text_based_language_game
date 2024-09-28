@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import ChatComponent from "@/components/ChatComponent";
-import UseDeeplTranslate from "@/components/UseDeeplTranslate";
+import useDeeplTranslate from "@/components/UseDeeplTranslate";
 
 export default function Home() {
   const [showChat, setShowChat] = useState(false);
@@ -10,7 +10,7 @@ export default function Home() {
     setShowChat(true);
   };
 
-  const { translateText, translations, translationError } = UseDeeplTranslate();
+  const { translateText, translations, translationError } = useDeeplTranslate(); // Use the hook here
 
   const handleTextSelection = async () => {
     const selection = window.getSelection();
@@ -21,7 +21,7 @@ export default function Home() {
     const text = selection.toString();
 
     try {
-      await translateText(text);
+      await translateText(text); // Translate selected text
     } catch (error) {
       console.error("Translation error:", error);
     }
@@ -31,8 +31,6 @@ export default function Home() {
     <div>
       <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
         <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-          {/* <ChatComponent /> */}
-          {/* <GameOne /> */}
           {showChat ? (
             <ChatComponent />
           ) : (
@@ -49,8 +47,11 @@ export default function Home() {
           </div>
           {translations.length > 0 && (
             <ul>
-              {translations.map((translation) => (
-                <li key={translation}>{translation}</li>
+              {translations.map((translation, index) => (
+                <li
+                  key={index}
+                  dangerouslySetInnerHTML={{ __html: translation }}
+                />
               ))}
             </ul>
           )}
@@ -59,12 +60,7 @@ export default function Home() {
           )}
         </main>
         <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-          <a
-            className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-            // href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            // target="_blank"
-            // rel="noopener noreferrer"
-          >
+          <a className="flex items-center gap-2 hover:underline hover:underline-offset-4">
             Learn
           </a>
           <a

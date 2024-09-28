@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-const UseDeeplTranslate = () => {
+const useDeeplTranslate = () => {
   const [translations, setTranslations] = useState<string[]>([]);
   const [translationError, setTranslationError] = useState<string>("");
 
@@ -17,7 +17,6 @@ const UseDeeplTranslate = () => {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const data = await response.json();
-      // Format translation with original text in bold followed by the translation
       const formattedTranslation = `<strong>${text}</strong>: ${data.translatedText}`;
       setTranslations((prev) => [...prev, formattedTranslation]);
     } catch (error) {
@@ -33,4 +32,4 @@ const UseDeeplTranslate = () => {
   };
 };
 
-export default UseDeeplTranslate;
+export default useDeeplTranslate;
