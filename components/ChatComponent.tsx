@@ -6,6 +6,8 @@ import { Mistral } from "@mistralai/mistralai";
 const ChatComponent: React.FC = () => {
   const [message, setMessage] = useState<string>("");
   const [response, setResponse] = useState<string>("");
+  const [fullJson, setFullJson] = useState<string>(""); // Full JSON for debugging
+
   const [loading, setLoading] = useState<boolean>(false);
   const [language, setLanguage] = useState<string>("English");
   const [languageLevel, setLanguageLevel] = useState<string>("A1");
@@ -13,9 +15,12 @@ const ChatComponent: React.FC = () => {
   const [conversationHistory, setConversationHistory] = useState<string>("");
   const [gameStarted, setGameStarted] = useState<boolean>(false);
   const [currentTurn, setCurrentTurn] = useState<number>(1); // Track the current turn
+  const [debugMode, setDebugMode] = useState<boolean>(false); // To toggle debug window
 
-  const role = "investor"; // Future-proofing for dynamic role changes
-
+  //    Define roles and context
+  const userRole = "developer"; // User's role
+  const aiRole = "investor"; // AI's role
+  const context = "seeking investment for my product"; // The user's context or aim
   // Handle initial investor sentence based on language selection
   const getInitialSentence = () => {
     if (language === "German") {
@@ -33,23 +38,25 @@ const ChatComponent: React.FC = () => {
       apiKey: process.env.NEXT_PUBLIC_MISTRAL_API_KEY as string,
     });
 
-    // Investor starts the conversation based on selected language
+    // Updated prompt to use variables for roles and context
     const initialPrompt = `
-      You are a ${role}, and I am a developer seeking investment for my product.
-      We will exchange sentences in ${language} at an ${languageLevel} level, over ${turns} turns.
-      At the last turn, you will decide if I get the investment. 
+You are playing the role of a ${aiRole}, and I am a ${userRole} ${context}.
+We will exchange sentences in ${language} at an ${languageLevel} level, over ${turns} turns.
+At the last turn, you will decide if I get the investment. 
 
-      Your responses should be formatted as JSON without any additional fields:
-      {
-        "answer": "string",
-        "decision": "string"
-      }
+Your first message should ask about the ${userRole}'s product.
 
-      Until the final turn, "decision" should always be null. On the last turn, "decision" can be either "winning" or "losing."
+Your responses should be formatted as JSON without any additional fields:
+{
+  "answer": "string",
+  "decision": "string"
+}
 
-      Let's start:
-      ${role}: "${getInitialSentence()}"
-    `;
+Until the final turn, "decision" should always be null. On the last turn, "decision" can be either "winning" or "losing."
+
+Let's start:
+You, as the ${aiRole}: "${getInitialSentence()}"
+`;
 
     setConversationHistory(initialPrompt); // Set the initial conversation history
 
@@ -60,9 +67,28 @@ const ChatComponent: React.FC = () => {
       });
 
       if (chatResponse && chatResponse.choices && chatResponse.choices.length > 0) {
-        const responseContent = chatResponse.choices[0].message.content || "No content in the response.";
+        let fullJsonResponse = chatResponse.choices[0]?.message?.content || ""; // Ensure it is a string
+        setFullJson(fullJsonResponse); // Set full JSON for debugging
+        console.log("Raw AI Response:", fullJsonResponse); // Log the raw response for debugging
+        // Remove markdown-like tags if present (```json or similar)
+        fullJsonResponse = fullJsonResponse.replace(/```json|```/g, "").trim();
+
+        console.log("Cleaned AI Response:", fullJsonResponse); // Log cleaned response
+
+        setFullJson(fullJsonResponse); // Set full JSON for debugging
+        // Try to parse the cleaned JSON response
+        let parsedResponse;
+        try {
+          parsedResponse = JSON.parse(fullJsonResponse); // Parse the string as JSON
+        } catch (error) {
+          console.error("Failed to parse response as JSON:", error);
+          setResponse("Error parsing the AI response.");
+          return;
+        }
+        // Extract only the 'answer' from the parsed JSON
+        const responseContent = parsedResponse?.answer || "No content in the response.";
         setResponse(responseContent); // Set the initial response from the investor
-        setConversationHistory(initialPrompt + `\n${role}: "${responseContent}"`); // Update conversation history
+        setConversationHistory(initialPrompt + `\n${aiRole}: "${responseContent}"`); // Update conversation history
       } else {
         setResponse("No response from the AI.");
       }
@@ -98,7 +124,33 @@ const ChatComponent: React.FC = () => {
       });
 
       if (chatResponse && chatResponse.choices && chatResponse.choices.length > 0) {
-        const responseContent = chatResponse.choices[0].message.content || "No content in the response.";
+        let fullJsonResponse = chatResponse.choices[0]?.message?.content || ""; // Ensure it's a string
+
+        console.log("Raw AI Response (Turn " + currentTurn + "):", fullJsonResponse); // Log the raw response for each turn
+
+        // Clean any markdown tags like ```json
+        fullJsonResponse = fullJsonResponse.replace(/```json|```/g, "").trim();
+
+        console.log("Cleaned AI Response (Turn " + currentTurn + "):", fullJsonResponse); // Log cleaned response
+
+        setFullJson(fullJsonResponse); // Set full JSON for debugging
+
+        // Try to parse the cleaned JSON response
+        let parsedResponse;
+        try {
+          parsedResponse = JSON.parse(fullJsonResponse); // Parse the string as JSON
+        } catch (error) {
+          console.error("Failed to parse response as JSON:", error);
+          setResponse("Error parsing the AI response.");
+          return;
+        }
+        // Log the parsed response content
+        console.log("Parsed AI Response (Turn " + currentTurn + "):", parsedResponse);
+
+        // Extract only the 'answer' from the parsed JSON
+        const responseContent = parsedResponse?.answer || "No content in the response.";
+
+        // Correctly set the response so only the 'answer' is displayed, not the whole JSON
         setResponse(responseContent); // Set response from the investor
         setConversationHistory(updatedHistory + `\nInvestor: "${responseContent}"`); // Update history
         setCurrentTurn(currentTurn + 1); // Move to the next turn
@@ -203,6 +255,24 @@ const ChatComponent: React.FC = () => {
           >
             {loading ? "Sending..." : currentTurn > turns ? "Game Over" : "Send"}
           </button>
+
+          {/* Toggle Debug Mode Button */}
+          <div className="mt-6">
+            <button
+              onClick={() => setDebugMode(!debugMode)}
+              className="w-full bg-gray-500 text-white py-2 rounded-lg font-semibold hover:bg-gray-600"
+            >
+              {debugMode ? "Hide Debug Info" : "Show Debug Info"}
+            </button>
+          </div>
+
+          {/* Debug Mode - Show Full JSON */}
+          {debugMode && (
+            <div className="mt-6 p-4 border border-gray-300 rounded-lg bg-white">
+              <h2 className="text-lg font-semibold text-red-800">Full JSON Response (Debug):</h2>
+              <pre className="mt-2 text-gray-700 whitespace-pre-wrap break-words">{fullJson}</pre>
+            </div>
+          )}
         </>
       )}
     </div>
