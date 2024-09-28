@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import ChatComponent from "@/components/ChatComponent";
-import useDeeplTranslate from "../components/useDeeplTranslate";
+import useDeeplTranslate from "@/components/useDeeplTranslate";
 
 export default function Home() {
   const [showChat, setShowChat] = useState(false);
