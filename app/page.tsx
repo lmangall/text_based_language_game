@@ -2,10 +2,14 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import ChatComponent from "@/components/ChatComponent";
+import DayInParis from "@/components/DayInParis";
+import ChatComponentTerminal from "@/components/ChatComponentTerminal";
 import useDeeplTranslate from "@/components/UseDeeplTranslate";
 
 export default function Home() {
-  const [showChat, setShowChat] = useState(false);
+  const [currentComponent, setCurrentComponent] = useState<
+    "chat" | "paris" | "terminal" | null
+  >(null);
   const { translateText, translations, translationError } = useDeeplTranslate();
 
   const handleTextSelection = async () => {
@@ -27,13 +31,32 @@ export default function Home() {
     <div>
       <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
         <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-          {showChat ? (
-            <ChatComponent />
-          ) : (
-            <Button variant="outline" onClick={() => setShowChat(true)}>
-              Play
+          <div className="flex gap-4">
+            <Button
+              variant="outline"
+              onClick={() => setCurrentComponent("chat")}
+            >
+              ChatComponent
             </Button>
-          )}
+            <Button
+              variant="outline"
+              onClick={() => setCurrentComponent("paris")}
+            >
+              DayInParis
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => setCurrentComponent("terminal")}
+            >
+              ChatComponentTerminal
+            </Button>
+          </div>
+
+          {/* Render Components Based on State */}
+          {currentComponent === "chat" && <ChatComponent />}
+          {currentComponent === "paris" && <DayInParis />}
+          {currentComponent === "terminal" && <ChatComponentTerminal />}
+
           <div
             className="bg-white w-full h-full max-h-80 bg-opacity-40 p-4 text-base font-normal border-2 border-gray-300 rounded-lg shadow-sm resize-none overflow-auto"
             aria-readonly="true"
@@ -61,6 +84,7 @@ export default function Home() {
             <p className="text-red-500">{translationError}</p>
           )}
         </main>
+
         <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
           <a className="flex items-center gap-2 hover:underline hover:underline-offset-4">
             Learn
