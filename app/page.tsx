@@ -1,4 +1,5 @@
 import GameOne from "./components/GameOne";
+// import GameTwo from "./components/GameTwo";
 
 export default function Home() {
   return (
