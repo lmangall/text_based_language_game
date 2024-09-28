@@ -5,6 +5,8 @@ import ChatComponent from "@/components/ChatComponent";
 import DayInParis from "@/components/DayInParis";
 import ChatComponentTerminal from "@/components/ChatComponentTerminal";
 import useDeeplTranslate from "@/components/UseDeeplTranslate";
+import Terminal from "@/components/Terminal";
+import ChatComponentTerminal from "@/components/ChatComponentTerminal";
 
 export default function Home() {
   const [currentComponent, setCurrentComponent] = useState<
@@ -71,24 +73,17 @@ export default function Home() {
               <h2 className="font-bold">Translations:</h2>
               <ul className="list-disc pl-5">
                 {translations.map((translation, index) => (
-                  <li
-                    key={index}
-                    dangerouslySetInnerHTML={{ __html: translation }}
-                  />
+                  <li key={index} dangerouslySetInnerHTML={{ __html: translation }} />
                 ))}
               </ul>
             </div>
           )}
 
-          {translationError && (
-            <p className="text-red-500">{translationError}</p>
-          )}
+          {translationError && <p className="text-red-500">{translationError}</p>}
         </main>
 
         <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-          <a className="flex items-center gap-2 hover:underline hover:underline-offset-4">
-            Learn
-          </a>
+          <a className="flex items-center gap-2 hover:underline hover:underline-offset-4">Learn</a>
           <a
             className="flex items-center gap-2 hover:underline hover:underline-offset-4"
             href="https://google.com"
@@ -107,6 +102,8 @@ export default function Home() {
           </a>
         </footer>
       </div>
+      <Terminal />
+      <ChatComponentTerminal />
     </div>
   );
 }

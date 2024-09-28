@@ -1,283 +1,203 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Mistral } from "@mistralai/mistralai";
 
-export default function Component() {
-  const [message, setMessage] = useState<string>("");
-  const [response, setResponse] = useState<string>("");
-  const [fullJson, setFullJson] = useState<string>("");
-  const [loading, setLoading] = useState<boolean>(false);
-  const [language, setLanguage] = useState<string>("English");
-  const [languageLevel, setLanguageLevel] = useState<string>("A1");
-  const [turns, setTurns] = useState<number>(5);
-  const [conversationHistory, setConversationHistory] = useState<string>("");
-  const [gameStarted, setGameStarted] = useState<boolean>(false);
-  const [currentTurn, setCurrentTurn] = useState<number>(1);
-  const [debugMode, setDebugMode] = useState<boolean>(false);
-
-  const terminalRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLTextAreaElement>(null);
-
-  const userRole = "developer";
-  const aiRole = "investor";
-  const context = "seeking investment for my product";
+const ChatTerminalComponent: React.FC = () => {
+  const [input, setInput] = useState<string>(""); // User input
+  const [history, setHistory] = useState<string[]>([]); // Command history
+  const [currentStep, setCurrentStep] = useState<number>(0); // Track the current step (language, level, etc.)
+  const [language, setLanguage] = useState<string>(""); // User's selected language
+  const [languageLevel, setLanguageLevel] = useState<string>(""); // User's selected level
+  const [turns, setTurns] = useState<number | null>(null); // Number of interactions
+  const [currentTurn, setCurrentTurn] = useState<number>(0); // Track the current turn
+  const [loading, setLoading] = useState<boolean>(false); // Track if the AI is processing
+  const [gameStarted, setGameStarted] = useState<boolean>(false); // Track if the quest has started
+  const [questEnded, setQuestEnded] = useState<boolean>(false); // Track if the quest has ended
+  const [feedback, setFeedback] = useState<string>(""); // Store feedback for language usage
 
   useEffect(() => {
-    if (terminalRef.current) {
-      terminalRef.current.scrollTop = terminalRef.current.scrollHeight;
-    }
-  }, [response, conversationHistory]);
+    setHistory((prevHistory) => [...prevHistory, "Which language would you like to learn? (English or Deutsch)"]);
+  }, []);
 
-  useEffect(() => {
-    if (gameStarted && inputRef.current) {
-      inputRef.current.focus();
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === "Enter" && input.trim()) {
+      handleUserInput(input.trim());
+      setInput(""); // Clear input after submission
     }
-  }, [gameStarted]);
-
-  const getInitialSentence = () => {
-    return language === "German"
-      ? "Hallo, schön dich zu treffen! Kannst du mir etwas über dein Produkt erzählen?"
-      : "Hello, it's great to meet you! Can you tell me about your product?";
   };
 
-  const handleStartGame = async () => {
-    setLoading(true);
-    setGameStarted(true);
+  const handleUserInput = async (userInput: string) => {
+    setHistory((prevHistory) => [...prevHistory, `$ ${userInput}`]);
 
-    const client = new Mistral({
-      apiKey: process.env.NEXT_PUBLIC_MISTRAL_API_KEY as string,
-    });
-
-    const initialPrompt = `
-You are playing the role of a ${aiRole}, and I am a ${userRole} ${context}.
-We will exchange sentences in ${language} at an ${languageLevel} level, over ${turns} turns.
-At the last turn, you will decide if I get the investment. 
-
-Your first message should ask about the ${userRole}'s product.
-
-Your responses should be formatted as JSON without any additional fields:
-{
-  "answer": "string",
-  "decision": "string"
-}
-
-Until the final turn, "decision" should always be null. On the last turn, "decision" can be either "winning" or "losing."
-
-Let's start:
-You, as the ${aiRole}: "${getInitialSentence()}"
-`;
-
-    setConversationHistory(initialPrompt);
-
-    try {
-      const chatResponse = await client.chat.complete({
-        model: "mistral-large-latest",
-        messages: [{ role: "system", content: initialPrompt }],
-      });
-
-      if (chatResponse && chatResponse.choices && chatResponse.choices.length > 0) {
-        let fullJsonResponse = chatResponse.choices[0]?.message?.content || "";
-        setFullJson(fullJsonResponse);
-        fullJsonResponse = fullJsonResponse.replace(/```json|```/g, "").trim();
-
-        let parsedResponse;
-        try {
-          parsedResponse = JSON.parse(fullJsonResponse);
-        } catch (error) {
-          console.error("Failed to parse response as JSON:", error);
-          setResponse("Error parsing the AI response.");
-          return;
-        }
-        const responseContent = parsedResponse?.answer || "No content in the response.";
-        setResponse(responseContent);
-        setConversationHistory(initialPrompt + `\n${aiRole}: "${responseContent}"`);
-      } else {
-        setResponse("No response from the AI.");
-      }
-    } catch (error) {
-      console.error("Error fetching response:", error);
-      setResponse("Something went wrong. Please try again.");
-    }
-
-    setLoading(false);
-  };
-
-  const handleSendMessage = async () => {
-    if (currentTurn > turns) {
-      setResponse("Game Over. You have reached the maximum number of turns.");
+    if (questEnded) {
+      setHistory((prevHistory) => [...prevHistory, "The game is over. Please restart if you want to play again."]);
       return;
     }
 
+    if (currentStep === 0) {
+      // Language selection step
+      if (userInput.toLowerCase() === "english" || userInput.toLowerCase() === "deutsch") {
+        setLanguage(userInput);
+        setCurrentStep(1);
+        setHistory((prevHistory) => [
+          ...prevHistory,
+          `Language set to ${userInput}.`,
+          "What is your level of knowledge? (A1, A2, B1, B2, C1, C2)",
+        ]);
+      } else {
+        setHistory((prevHistory) => ["Invalid input. Please choose either English or Deutsch."]);
+      }
+    } else if (currentStep === 1) {
+      // Language level selection step
+      if (["a1", "a2", "b1", "b2", "c1", "c2"].includes(userInput.toLowerCase())) {
+        setLanguageLevel(userInput.toUpperCase());
+        setCurrentStep(2);
+        setHistory((prevHistory) => [
+          ...prevHistory,
+          `Knowledge level set to ${userInput.toUpperCase()}.`,
+          "How many interactions would you like to have? (1-20)",
+        ]);
+      } else {
+        setHistory((prevHistory) => ["Invalid input. Please choose a level between A1 and C2."]);
+      }
+    } else if (currentStep === 2) {
+      // Number of interactions selection step
+      const numTurns = parseInt(userInput, 10);
+      if (!isNaN(numTurns) && numTurns >= 1 && numTurns <= 20) {
+        setTurns(numTurns);
+        setHistory((prevHistory) => [
+          ...prevHistory,
+          `Number of interactions set to ${numTurns}.`,
+          "Starting your quest...",
+        ]);
+        setGameStarted(true);
+        startQuest(); // Start the quest after all choices are made
+      } else {
+        setHistory((prevHistory) => ["Invalid input. Please choose a number between 1 and 20."]);
+      }
+    } else if (gameStarted && currentTurn < turns!) {
+      // Handle the quest interactions
+      await processTurn(userInput);
+    }
+  };
+
+  const startQuest = () => {
+    setHistory((prevHistory) => [
+      ...prevHistory,
+      `Your task is to read the contents of a file or solve a task in the terminal environment. Let me know what you'd like to do.`,
+    ]);
+    setCurrentTurn(1);
+  };
+
+  const processTurn = async (userInput: string) => {
     setLoading(true);
 
     const client = new Mistral({
       apiKey: process.env.NEXT_PUBLIC_MISTRAL_API_KEY as string,
     });
 
-    const updatedHistory = conversationHistory + `\nUser: "${message}"`;
+    const conversationHistory = history.join("\n");
 
     try {
       const chatResponse = await client.chat.complete({
         model: "mistral-large-latest",
         messages: [
-          { role: "system", content: updatedHistory },
-          { role: "user", content: message },
+          { role: "system", content: conversationHistory },
+          { role: "user", content: userInput },
         ],
       });
 
       if (chatResponse && chatResponse.choices && chatResponse.choices.length > 0) {
-        let fullJsonResponse = chatResponse.choices[0]?.message?.content || "";
-        fullJsonResponse = fullJsonResponse.replace(/```json|```/g, "").trim();
-        setFullJson(fullJsonResponse);
+        const aiResponse = chatResponse.choices[0].message.content.trim();
 
-        let parsedResponse;
-        try {
-          parsedResponse = JSON.parse(fullJsonResponse);
-        } catch (error) {
-          console.error("Failed to parse response as JSON:", error);
-          setResponse("Error parsing the AI response.");
-          return;
+        setHistory((prevHistory) => [...prevHistory, `Terminal: ${aiResponse}`]);
+        setCurrentTurn((prevTurn) => prevTurn + 1);
+
+        if (currentTurn >= turns! - 1) {
+          endQuest(); // End the quest after all turns
         }
-
-        const responseContent = parsedResponse?.answer || "No content in the response.";
-        setResponse(responseContent);
-        setConversationHistory(updatedHistory + `\nInvestor: "${responseContent}"`);
-        setCurrentTurn(currentTurn + 1);
       } else {
-        setResponse("No response from the AI.");
+        setHistory((prevHistory) => [...prevHistory, "No response from the terminal."]);
       }
     } catch (error) {
-      console.error("Error fetching response:", error);
-      setResponse("Something went wrong. Please try again.");
+      setHistory((prevHistory) => [...prevHistory, "Error processing the turn. Please try again."]);
     }
 
     setLoading(false);
-    setMessage("");
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleSendMessage();
+  const endQuest = async () => {
+    // Determine success or failure (random for demo purposes)
+    const success = Math.random() > 0.5;
+    const resultMessage = success ? "You have succeeded!" : "You have failed.";
+
+    setHistory((prevHistory) => [...prevHistory, resultMessage]);
+    setQuestEnded(true);
+
+    // Request language feedback
+    await requestFeedback();
+  };
+
+  const requestFeedback = async () => {
+    setLoading(true);
+
+    const client = new Mistral({
+      apiKey: process.env.NEXT_PUBLIC_MISTRAL_API_KEY as string,
+    });
+
+    const feedbackPrompt = `
+Please assess the following conversation between a ${languageLevel} ${language} learner and a terminal.
+Analyze the user's language usage and provide feedback on grammar, sentence structure, and vocabulary.
+
+Conversation history:
+${history.join("\n")}
+    `;
+
+    try {
+      const feedbackResponse = await client.chat.complete({
+        model: "mistral-large-latest",
+        messages: [{ role: "system", content: feedbackPrompt }],
+      });
+
+      if (feedbackResponse && feedbackResponse.choices && feedbackResponse.choices.length > 0) {
+        const feedbackText = feedbackResponse.choices[0].message.content.trim();
+        setFeedback(feedbackText);
+        setHistory((prevHistory) => [...prevHistory, "Feedback on your language usage:", feedbackText]);
+      } else {
+        setHistory((prevHistory) => [...prevHistory, "No feedback available."]);
+      }
+    } catch (error) {
+      setHistory((prevHistory) => [...prevHistory, "Error fetching feedback."]);
     }
+
+    setLoading(false);
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-black text-green-400 font-mono rounded-lg shadow-lg">
-      <h1 className="text-2xl font-bold text-center mb-4">Investor-Developer Dialogue Simulation</h1>
-
-      {!gameStarted && (
-        <>
-          <div className="mb-4">
-            <label htmlFor="language" className="block font-bold mb-2">
-              Language
-            </label>
-            <select
-              id="language"
-              value={language}
-              onChange={(e) => setLanguage(e.target.value)}
-              className="w-full p-2 bg-black border border-green-400 rounded-lg focus:outline-none focus:border-green-500"
-            >
-              <option value="English">English</option>
-              <option value="German">German</option>
-            </select>
-          </div>
-
-          <div className="mb-4">
-            <label htmlFor="languageLevel" className="block font-bold mb-2">
-              Language Level
-            </label>
-            <select
-              id="languageLevel"
-              value={languageLevel}
-              onChange={(e) => setLanguageLevel(e.target.value)}
-              className="w-full p-2 bg-black border border-green-400 rounded-lg focus:outline-none focus:border-green-500"
-            >
-              <option value="A1">A1 (Beginner)</option>
-              <option value="A2">A2 (Elementary)</option>
-              <option value="B1">B1 (Intermediate)</option>
-              <option value="B2">B2 (Upper Intermediate)</option>
-              <option value="C1">C1 (Advanced)</option>
-              <option value="C2">C2 (Proficient)</option>
-            </select>
-          </div>
-
-          <div className="mb-4">
-            <label htmlFor="turns" className="block font-bold mb-2">
-              Number of Turns
-            </label>
-            <input
-              id="turns"
-              type="number"
-              value={turns}
-              onChange={(e) => setTurns(Number(e.target.value))}
-              className="w-full p-2 bg-black border border-green-400 rounded-lg focus:outline-none focus:border-green-500"
-              min="1"
-              max="20"
-            />
-          </div>
-
-          <button
-            onClick={handleStartGame}
-            disabled={loading}
-            className={`w-full bg-green-600 text-black py-2 rounded-lg font-semibold ${
-              loading ? "cursor-not-allowed opacity-50" : "hover:bg-green-500"
-            }`}
-          >
-            {loading ? "Starting..." : "Play"}
-          </button>
-        </>
-      )}
-
-      {gameStarted && (
-        <>
-          <div
-            ref={terminalRef}
-            className="mt-6 p-4 border border-green-400 rounded-lg bg-black h-64 overflow-y-auto"
-            aria-live="polite"
-          >
-            <pre className="whitespace-pre-wrap">{conversationHistory}</pre>
-          </div>
-
-          <textarea
-            ref={inputRef}
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="Type your response here..."
-            rows={4}
-            className="w-full p-4 bg-black border border-green-400 rounded-lg focus:outline-none focus:border-green-500 mb-4 mt-4"
-            disabled={loading || currentTurn > turns}
+    <div
+      className="bg-gray-900 text-green-400 font-mono h-screen w-full p-4 overflow-y-auto"
+      onKeyDown={handleKeyDown}
+      tabIndex={0}
+    >
+      <div className="space-y-2">
+        {history.map((line, index) => (
+          <div key={index}>{line}</div>
+        ))}
+        <div className="flex">
+          <span className="text-green-500">$</span>&nbsp;
+          <input
+            className="bg-transparent outline-none text-green-400 w-full"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            disabled={loading || questEnded}
+            autoFocus
           />
-
-          <button
-            onClick={handleSendMessage}
-            disabled={loading || !message || currentTurn > turns}
-            className={`w-full bg-green-600 text-black py-2 rounded-lg font-semibold ${
-              loading || !message || currentTurn > turns ? "cursor-not-allowed opacity-50" : "hover:bg-green-500"
-            }`}
-          >
-            {loading ? "Sending..." : currentTurn > turns ? "Game Over" : "Send"}
-          </button>
-
-          <div className="mt-6">
-            <button
-              onClick={() => setDebugMode(!debugMode)}
-              className="w-full bg-gray-600 text-white py-2 rounded-lg font-semibold hover:bg-gray-500"
-            >
-              {debugMode ? "Hide Debug Info" : "Show Debug Info"}
-            </button>
-          </div>
-
-          {debugMode && (
-            <div className="mt-6 p-4 border border-green-400 rounded-lg bg-black">
-              <h2 className="text-lg font-semibold text-red-400">Full JSON Response (Debug):</h2>
-              <pre className="mt-2 whitespace-pre-wrap break-words">{fullJson}</pre>
-            </div>
-          )}
-        </>
-      )}
+        </div>
+      </div>
+      {loading && <p className="text-yellow-500 mt-4">Processing...</p>}
     </div>
   );
-}
+};
+
+export default ChatTerminalComponent;
