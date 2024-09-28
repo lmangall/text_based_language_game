@@ -169,13 +169,17 @@ const DayInParis: React.FC = () => {
 
   const renderOptions = (options: GameOption[]) => {
     return options.map((option, index) => (
-      <button
-        key={index}
-        onClick={() => handleOptionClick(option)}
-        className="text-left my-2 p-2 bg-transparent border-none cursor-pointer"
-      >
-        {option.emoji} <span className="italic">{option.text}</span>
-      </button>
+      <div key={index} className="flex items-center my-2">
+        {/* Emoji button triggers the option */}
+        <button
+          onClick={() => handleOptionClick(option)}
+          className="text-left bg-transparent border-none cursor-pointer text-xl mr-3"
+        >
+          {option.emoji}
+        </button>
+        {/* Text is not clickable */}
+        <span className="italic">{option.text}</span>
+      </div>
     ));
   };
 
