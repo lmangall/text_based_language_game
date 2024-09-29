@@ -14,7 +14,7 @@ const ChatTerminalComponent: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false); // Track if the AI is processing
   const [gameStarted, setGameStarted] = useState<boolean>(false); // Track if the quest has started
   const [questEnded, setQuestEnded] = useState<boolean>(false); // Track if the quest has ended
-  const [feedback, setFeedback] = useState<string>(""); // Store feedback for language usage
+  const [feedback, setFeedback] = useState<string>(""); // AI feedback on the user's language
 
   useEffect(() => {
     setHistory((prevHistory) => [...prevHistory, "Which language would you like to learn? (English or Deutsch)"]);
@@ -201,6 +201,13 @@ ${history.join("\n")}
         </div>
       </div>
       {loading && <p className="text-yellow-500 mt-4">Processing...</p>}
+
+      {questEnded && feedback && (
+        <div className="mt-4 p-4 bg-gray-800 text-green-300 rounded-lg">
+          <h3 className="text-lg font-bold">Feedback on your language usage:</h3>
+          <p>{feedback}</p>
+        </div>
+      )}
     </div>
   );
 };
