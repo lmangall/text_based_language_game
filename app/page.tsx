@@ -2,14 +2,7 @@
 
 import { useCallback } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import ChatComponent from "@/components/ChatComponent";
 import DayInParis from "@/components/DayInParis";
@@ -18,6 +11,15 @@ import { ChevronLeftIcon, ChevronRightIcon, MenuIcon } from "lucide-react";
 import { GitHubLogoIcon, MagicWandIcon } from "@radix-ui/react-icons";
 import { useInitData } from "@/components/useInitData";
 import { useState } from "react";
+
+// Assuming you have these variables defined elsewhere in your code
+const targetLanguage = "German"; // Or dynamically get it from some state
+const languageLevel = "A1";
+const turnNumbers = 5;
+const userLanguage = "English";
+const aiRole = "investor";
+const userRole = "developer";
+const context = "seeking investment for my product";
 
 type GameComponent = "chat" | "paris" | "terminal";
 
@@ -60,14 +62,23 @@ const cards: GameCard[] = [
 
 export default function Home() {
   const { initData, error, loading } = useInitData();
-  const [currentComponent, setCurrentComponent] =
-    useState<GameComponent | null>(null);
+  const [currentComponent, setCurrentComponent] = useState<GameComponent | null>(null);
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
 
   const renderComponent = useCallback(() => {
     switch (currentComponent) {
       case "chat":
-        return <ChatComponent />;
+        return (
+          <ChatComponent
+            targetLanguage={targetLanguage}
+            languageLevel={languageLevel}
+            turnNumbers={turnNumbers}
+            userLanguage={userLanguage}
+            aiRole={aiRole}
+            userRole={userRole}
+            context={context}
+          />
+        );
       case "paris":
         return <DayInParis />;
       case "terminal":
@@ -82,9 +93,7 @@ export default function Home() {
   }, []);
 
   const prevCard = useCallback(() => {
-    setCurrentCardIndex(
-      (prevIndex) => (prevIndex - 1 + cards.length) % cards.length
-    );
+    setCurrentCardIndex((prevIndex) => (prevIndex - 1 + cards.length) % cards.length);
   }, []);
 
   if (loading) {
@@ -111,14 +120,10 @@ export default function Home() {
       </header>
 
       {currentComponent ? (
-        <div className="flex-grow flex items-center justify-center p-4">
-          {renderComponent()}
-        </div>
+        <div className="flex-grow flex items-center justify-center p-4">{renderComponent()}</div>
       ) : (
         <main className="flex-grow flex flex-col items-center justify-center p-4">
-          <h2 className="text-2xl font-bold text-center">
-            Welcome {initData?.user?.firstName || "User"}!
-          </h2>
+          <h2 className="text-2xl font-bold text-center">Welcome {initData?.user?.firstName || "User"}!</h2>
           <p className="text-center text-gray-600 max-w-md mb-6">
             Choose a game to play and improve your language skills.
           </p>
@@ -127,14 +132,10 @@ export default function Home() {
             <Card className="w-full" style={{ width: "80%" }}>
               <CardHeader>
                 <CardTitle className="text-center">
-                  <span className="text-4xl mr-2">
-                    {cards[currentCardIndex].emoji}
-                  </span>
+                  <span className="text-4xl mr-2">{cards[currentCardIndex].emoji}</span>
                   {cards[currentCardIndex].title}
                 </CardTitle>
-                <CardDescription>
-                  {cards[currentCardIndex].description}
-                </CardDescription>
+                <CardDescription>{cards[currentCardIndex].description}</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="flex flex-wrap gap-2 mb-4">
@@ -144,18 +145,11 @@ export default function Home() {
                     </Badge>
                   ))}
                 </div>
-                <Button
-                  className="w-full"
-                  onClick={() =>
-                    setCurrentComponent(cards[currentCardIndex].component)
-                  }
-                >
+                <Button className="w-full" onClick={() => setCurrentComponent(cards[currentCardIndex].component)}>
                   {cards[currentCardIndex].buttonText}
                 </Button>
               </CardContent>
-              <CardFooter className="text-sm text-gray-500 text-center">
-                Explore and learn with LangGenie
-              </CardFooter>
+              <CardFooter className="text-sm text-gray-500 text-center">Explore and learn with LangGenie</CardFooter>
             </Card>
             <Button
               variant="ghost"

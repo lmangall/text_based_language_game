@@ -5,18 +5,16 @@ import { Mistral } from "@mistralai/mistralai";
 import { marked } from "marked"; // Import for feedback
 
 const ChatTerminalComponent: React.FC = () => {
-  const [input, setInput] = useState<string>(""); // User input
-  const [response, setResponse] = useState<string>(""); // AI response
-  const [history, setHistory] = useState<string[]>([]); // Command history
-  const [loading, setLoading] = useState<boolean>(false); // Track if the AI is processing
-
-  const [language, setLanguage] = useState<string>(""); // User's selected language
-  const [languageLevel, setLanguageLevel] = useState<string>(""); // User's selected level
-  const [turns, setTurns] = useState<number | null>(null); // Number of interactions
-  const [currentTurn, setCurrentTurn] = useState<number>(0); // Track the current turn
-  const [gameStarted, setGameStarted] = useState<boolean>(false); // Track if the quest has started
-  const [feedback, setFeedback] = useState<string>(""); // AI feedback on the user's language
-
+  const [input, setInput] = useState<string>("");
+  const [response, setResponse] = useState<string>("");
+  const [history, setHistory] = useState<string[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [language, setLanguage] = useState<string>("");
+  const [languageLevel, setLanguageLevel] = useState<string>("");
+  const [turns, setTurns] = useState<number | null>(null);
+  const [currentTurn, setCurrentTurn] = useState<number>(0);
+  const [gameStarted, setGameStarted] = useState<boolean>(false);
+  const [feedback, setFeedback] = useState<string>("");
   // Task context (this can be expanded or randomized later)
   const initialTask = `
   There is a tree structure in the directory 'project':
