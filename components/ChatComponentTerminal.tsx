@@ -15,6 +15,7 @@ const ChatTerminalComponent: React.FC = () => {
   const [gameStarted, setGameStarted] = useState<boolean>(false); // Track if the quest has started
   const [questEnded, setQuestEnded] = useState<boolean>(false); // Track if the quest has ended
   const [feedback, setFeedback] = useState<string>(""); // AI feedback on the user's language
+  const [errorMessage, setErrorMessage] = useState<string | null>(null); // Store error messages separately
 
   useEffect(() => {
     setHistory((prevHistory) => [...prevHistory, "Which language would you like to learn? (English or Deutsch)"]);
@@ -31,7 +32,7 @@ const ChatTerminalComponent: React.FC = () => {
     setHistory((prevHistory) => [...prevHistory, `$ ${userInput}`]);
 
     if (questEnded) {
-      setHistory((prevHistory) => [...prevHistory, "The game is over. Please restart if you want to play again."]);
+      setErrorMessage("The game is over. Please restart if you want to play again.");
       return;
     }
 
@@ -45,8 +46,9 @@ const ChatTerminalComponent: React.FC = () => {
           `Language set to ${userInput}.`,
           "What is your level of knowledge? (A1, A2, B1, B2, C1, C2)",
         ]);
+        setErrorMessage(null); // Clear any previous errors
       } else {
-        setHistory((prevHistory) => ["Invalid input. Please choose either English or Deutsch."]);
+        setErrorMessage("Invalid input. Please choose either English or Deutsch.");
       }
     } else if (currentStep === 1) {
       // Language level selection step
@@ -58,8 +60,9 @@ const ChatTerminalComponent: React.FC = () => {
           `Knowledge level set to ${userInput.toUpperCase()}.`,
           "How many interactions would you like to have? (1-20)",
         ]);
+        setErrorMessage(null);
       } else {
-        setHistory((prevHistory) => ["Invalid input. Please choose a level between A1 and C2."]);
+        setErrorMessage("Invalid input. Please choose a level between A1 and C2.");
       }
     } else if (currentStep === 2) {
       // Number of interactions selection step
@@ -73,8 +76,9 @@ const ChatTerminalComponent: React.FC = () => {
         ]);
         setGameStarted(true);
         startQuest(); // Start the quest after all choices are made
+        setErrorMessage(null);
       } else {
-        setHistory((prevHistory) => ["Invalid input. Please choose a number between 1 and 20."]);
+        setErrorMessage("Invalid input. Please choose a number between 1 and 20.");
       }
     } else if (gameStarted && currentTurn < turns!) {
       // Handle the quest interactions
@@ -199,6 +203,7 @@ ${history.join("\n")}
             autoFocus
           />
         </div>
+        {errorMessage && <div className="text-red-500">{errorMessage}</div>}
       </div>
       {loading && <p className="text-yellow-500 mt-4">Processing...</p>}
 
