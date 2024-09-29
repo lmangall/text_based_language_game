@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import useDeeplTranslate from "@/components/UseDeeplTranslate";
 
 interface GameOption {
   emoji: string;
@@ -193,6 +194,7 @@ En sortant de la station de métro Champs Elysées Clémenceau, vous voyez une g
 
 const DayInParis: React.FC = () => {
   const [currentStep, setCurrentStep] = useState<string>("start");
+  const { translateText, translations, translationError } = useDeeplTranslate();
 
   const handleOptionClick = (option: GameOption) => {
     if (option.lose) {
@@ -215,14 +217,32 @@ const DayInParis: React.FC = () => {
         >
           {option.emoji}
         </button>
-        <span className="italic">{option.text}</span>
+        <span className="italic" onMouseUp={handleTextSelection}>
+          {option.text}
+        </span>
       </div>
     ));
   };
 
+  const handleTextSelection = async () => {
+    const selection = window.getSelection();
+    if (!selection || !selection.toString()) {
+      return;
+    }
+
+    const text = selection.toString().trim();
+    if (text.length === 0) return;
+
+    try {
+      await translateText(text);
+    } catch (error) {
+      console.error("Translation error:", error);
+    }
+  };
+
   const renderDescription = (description: string) => {
     return description.split("\n").map((line, index) => (
-      <p key={index} className="my-4">
+      <p key={index} className="my-4" onMouseUp={handleTextSelection}>
         {line}
       </p>
     ));
@@ -244,6 +264,24 @@ const DayInParis: React.FC = () => {
           </button>
         </div>
       )}
+      {/* Render translations here */}
+      {translations.length > 0 && (
+        <div className="mt-4 w-full">
+          <h2 className="font-bold">Translations:</h2>
+          <ul className="list-disc pl-5">
+            {translations.map((translation, index) => (
+              <li
+                key={index}
+                dangerouslySetInnerHTML={{ __html: translation }}
+              />
+            ))}
+          </ul>
+          {translationError && (
+            <p className="text-red-500">{translationError}</p>
+          )}
+        </div>
+      )}
+      {translationError && <p className="text-red-500">{translationError}</p>}
     </div>
   );
 };
