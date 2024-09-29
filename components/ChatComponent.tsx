@@ -10,12 +10,14 @@ const ChatComponent: React.FC = () => {
   const [fullJson, setFullJson] = useState<string>(""); // Full JSON for debugging
 
   const [loading, setLoading] = useState<boolean>(false);
+
   const [language, setLanguage] = useState<string>("English");
   const [languageLevel, setLanguageLevel] = useState<string>("A1");
+
   const [turns, setTurns] = useState<number>(5); // Default number of turns
+  const [currentTurn, setCurrentTurn] = useState<number>(1); // Track the current turn
   const [conversationHistory, setConversationHistory] = useState<string>("");
   const [gameStarted, setGameStarted] = useState<boolean>(false);
-  const [currentTurn, setCurrentTurn] = useState<number>(1); // Track the current turn
   const [debugMode, setDebugMode] = useState<boolean>(false); // To toggle debug window
 
   //    Define roles and context
