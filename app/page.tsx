@@ -99,6 +99,8 @@ export default function Home() {
     console.error("Error initializing app:", error);
   }
 
+  console.log("InitData in Home:", initData); // Debugging statement
+
   return (
     <div className="min-h-screen flex flex-col">
       <header className="p-4 flex justify-between items-center bg-primary text-primary-foreground">
