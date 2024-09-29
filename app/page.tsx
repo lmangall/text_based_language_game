@@ -123,8 +123,8 @@ export default function Home() {
             Choose a game to play and improve your language skills.
           </p>
 
-          <div className="relative w-full max-w-sm">
-            <Card className="w-full">
+          <div className="relative w-full max-w-sm flex justify-center items-center">
+            <Card className="w-full" style={{ width: "80%" }}>
               <CardHeader>
                 <CardTitle className="text-center">
                   <span className="text-4xl mr-2">

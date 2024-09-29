@@ -208,24 +208,31 @@ const DayInParis: React.FC = () => {
     setCurrentStep("start");
   };
 
-  const handleTextSelection = async () => {
-    const selection = window.getSelection();
-    if (!selection || !selection.toString().trim()) {
-      return;
-    }
-
-    const selectedText = selection.toString().trim();
+  const handleWordClick = async (word: string) => {
     try {
-      await translateText(selectedText);
+      await translateText(word);
     } catch (error) {
       console.error("Translation error:", error);
     }
   };
 
+  // Helper to make any text clickable for translation
+  const makeTextClickable = (text: string) => {
+    return text.split(" ").map((word, index) => (
+      <span
+        key={index}
+        onClick={() => handleWordClick(word)}
+        className="inline cursor-pointer" // No underline, but clickable
+      >
+        {word}{" "}
+      </span>
+    ));
+  };
+
   const renderDescription = (description: string) => {
     return description.split("\n").map((line, index) => (
-      <p key={index} className="my-4" onMouseUp={handleTextSelection}>
-        {line}
+      <p key={index} className="my-4">
+        {makeTextClickable(line)}
       </p>
     ));
   };
@@ -239,8 +246,8 @@ const DayInParis: React.FC = () => {
         >
           {option.emoji}
         </button>
-        <span className="italic" onMouseUp={handleTextSelection}>
-          {option.text}
+        <span className="italic cursor-pointer">
+          {makeTextClickable(option.text)}
         </span>
       </div>
     ));
