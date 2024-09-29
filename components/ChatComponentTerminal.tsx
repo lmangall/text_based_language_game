@@ -109,7 +109,8 @@ const ChatTerminalComponent: React.FC = () => {
       });
 
       if (chatResponse && chatResponse.choices && chatResponse.choices.length > 0) {
-        const aiResponse = chatResponse.choices[0].message.content.trim();
+        // const aiResponse = chatResponse.choices[0].message.content.trim();
+        const aiResponse = chatResponse.choices?.[0]?.message?.content?.trim() || "";
 
         setHistory((prevHistory) => [...prevHistory, `Terminal: ${aiResponse}`]);
         setCurrentTurn((prevTurn) => prevTurn + 1);
@@ -121,6 +122,7 @@ const ChatTerminalComponent: React.FC = () => {
         setHistory((prevHistory) => [...prevHistory, "No response from the terminal."]);
       }
     } catch (error) {
+      console.error("Error fetching AI response:", error);
       setHistory((prevHistory) => [...prevHistory, "Error processing the turn. Please try again."]);
     }
 
@@ -161,13 +163,16 @@ ${history.join("\n")}
       });
 
       if (feedbackResponse && feedbackResponse.choices && feedbackResponse.choices.length > 0) {
-        const feedbackText = feedbackResponse.choices[0].message.content.trim();
+        // const feedbackText = feedbackResponse.choices[0].message.content.trim();
+        const feedbackText = feedbackResponse.choices?.[0]?.message?.content?.trim() || "";
         setFeedback(feedbackText);
         setHistory((prevHistory) => [...prevHistory, "Feedback on your language usage:", feedbackText]);
       } else {
         setHistory((prevHistory) => [...prevHistory, "No feedback available."]);
       }
+      // } catch () {
     } catch (error) {
+      console.error("Error fetching feedback:", error);
       setHistory((prevHistory) => [...prevHistory, "Error fetching feedback."]);
     }
 

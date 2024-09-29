@@ -18,6 +18,22 @@ import { ChevronLeftIcon, ChevronRightIcon, MenuIcon } from "lucide-react";
 import { GitHubLogoIcon, MagicWandIcon } from "@radix-ui/react-icons";
 
 export default function Home() {
+  const [currentComponent, setCurrentComponent] = useState<"chat" | "paris" | "terminal" | null>(null);
+  const { translateText, translations, translationError } = useDeeplTranslate();
+
+  const handleTextSelection = async () => {
+    const selection = window.getSelection();
+    if (!selection || !selection.toString()) {
+      return;
+    }
+
+    const text = selection.toString();
+
+    try {
+      await translateText(text); // Translate selected text
+    } catch (error) {
+      console.error("Translation error:", error);
+    }
   const [currentComponent, setCurrentComponent] = useState<
     "chat" | "paris" | "terminal" | null
   >(null);
@@ -76,6 +92,15 @@ export default function Home() {
   };
 
   return (
+    <div>
+      <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
+        <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
+          <div className="flex gap-4">
+            <Button variant="outline" onClick={() => setCurrentComponent("chat")}>
+              ChatComponent
+            </Button>
+            <Button variant="outline" onClick={() => setCurrentComponent("paris")}>
+              DayInParis
     <div className="min-h-screen flex flex-col">
       <header className="p-4 flex justify-between items-center bg-primary text-primary-foreground">
         <h1 className="text-xl font-bold">Game & languages</h1>
@@ -142,6 +167,8 @@ export default function Home() {
             >
               <ChevronLeftIcon className="h-6 w-6" />
             </Button>
+            <Button variant="outline" onClick={() => setCurrentComponent("terminal")}>
+              ChatComponentTerminal
             <Button
               variant="ghost"
               size="icon"
