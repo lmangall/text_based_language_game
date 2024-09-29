@@ -2,21 +2,21 @@ declare module "@telegram-apps/sdk" {
   interface User {
     id: number;
     firstName: string;
-    last_name: string;
+    lastName: string;
     username: string;
-    language_code: string;
-    is_premium?: boolean;
-    allows_write_to_pm?: boolean;
+    languageCode: string;
+    isPremium?: boolean;
+    allowsWriteToPm?: boolean;
   }
 
   interface InitData {
     user: User;
     hash: string;
-    auth_date: Date;
-    start_param: string;
-    chat_type: string;
-    chat_instance: string;
-    query_id: string;
+    authDate: Date;
+    startParam: string;
+    chatType: string;
+    chatInstance: string;
+    queryId: string;
   }
 
   interface TelegramInitData {

@@ -29,16 +29,18 @@ export function useInitData() {
           user: {
             id: 12345,
             firstName: "John",
-            last_name: "Doe",
+            lastName: "Doe",
             username: "johndoe",
-            language_code: "en",
+            languageCode: "en",
+            isPremium: false,
+            allowsWriteToPm: true,
           },
           hash: "mock_hash",
-          auth_date: new Date(),
-          start_param: "mock_start_param",
-          chat_type: "mock_chat_type",
-          chat_instance: "mock_chat_instance",
-          query_id: "mock_query_id",
+          authDate: new Date(),
+          startParam: "mock_start_param",
+          chatType: "mock_chat_type",
+          chatInstance: "mock_chat_instance",
+          queryId: "mock_query_id",
         });
       } finally {
         setLoading(false);
