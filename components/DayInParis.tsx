@@ -208,6 +208,28 @@ const DayInParis: React.FC = () => {
     setCurrentStep("start");
   };
 
+  const handleTextSelection = async () => {
+    const selection = window.getSelection();
+    if (!selection || !selection.toString().trim()) {
+      return;
+    }
+
+    const selectedText = selection.toString().trim();
+    try {
+      await translateText(selectedText);
+    } catch (error) {
+      console.error("Translation error:", error);
+    }
+  };
+
+  const renderDescription = (description: string) => {
+    return description.split("\n").map((line, index) => (
+      <p key={index} className="my-4" onMouseUp={handleTextSelection}>
+        {line}
+      </p>
+    ));
+  };
+
   const renderOptions = (options: GameOption[]) => {
     return options.map((option, index) => (
       <div key={index} className="flex items-center my-2">
@@ -224,33 +246,11 @@ const DayInParis: React.FC = () => {
     ));
   };
 
-  const handleTextSelection = async () => {
-    const selection = window.getSelection();
-    if (!selection || !selection.toString()) {
-      return;
-    }
-
-    const text = selection.toString().trim();
-    if (text.length === 0) return;
-
-    try {
-      await translateText(text);
-    } catch (error) {
-      console.error("Translation error:", error);
-    }
-  };
-
-  const renderDescription = (description: string) => {
-    return description.split("\n").map((line, index) => (
-      <p key={index} className="my-4" onMouseUp={handleTextSelection}>
-        {line}
-      </p>
-    ));
-  };
-
   return (
     <div className="font-sans p-5">
-      {renderDescription(steps[currentStep].description)}
+      <div className="description">
+        {renderDescription(steps[currentStep].description)}
+      </div>
       {steps[currentStep].options.length > 0 ? (
         <div>{renderOptions(steps[currentStep].options)}</div>
       ) : (
