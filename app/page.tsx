@@ -2,14 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import ChatComponent from "@/components/ChatComponent";
 import DayInParis from "@/components/DayInParis";
@@ -19,24 +12,6 @@ import { GitHubLogoIcon, MagicWandIcon } from "@radix-ui/react-icons";
 
 export default function Home() {
   const [currentComponent, setCurrentComponent] = useState<"chat" | "paris" | "terminal" | null>(null);
-  const { translateText, translations, translationError } = useDeeplTranslate();
-
-  const handleTextSelection = async () => {
-    const selection = window.getSelection();
-    if (!selection || !selection.toString()) {
-      return;
-    }
-
-    const text = selection.toString();
-
-    try {
-      await translateText(text); // Translate selected text
-    } catch (error) {
-      console.error("Translation error:", error);
-    }
-  const [currentComponent, setCurrentComponent] = useState<
-    "chat" | "paris" | "terminal" | null
-  >(null);
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
 
   const cards = [
@@ -60,8 +35,7 @@ export default function Home() {
     {
       emoji: "💻",
       title: "Code in the Terminal",
-      description:
-        "Experience coding challenges in a terminal-like environment.",
+      description: "Experience coding challenges in a terminal-like environment.",
       buttonText: "Hello World",
       tags: ["B1", "EN", "Bot"],
       component: "terminal",
@@ -86,21 +60,10 @@ export default function Home() {
   };
 
   const prevCard = () => {
-    setCurrentCardIndex(
-      (prevIndex) => (prevIndex - 1 + cards.length) % cards.length
-    );
+    setCurrentCardIndex((prevIndex) => (prevIndex - 1 + cards.length) % cards.length);
   };
 
   return (
-    <div>
-      <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-        <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-          <div className="flex gap-4">
-            <Button variant="outline" onClick={() => setCurrentComponent("chat")}>
-              ChatComponent
-            </Button>
-            <Button variant="outline" onClick={() => setCurrentComponent("paris")}>
-              DayInParis
     <div className="min-h-screen flex flex-col">
       <header className="p-4 flex justify-between items-center bg-primary text-primary-foreground">
         <h1 className="text-xl font-bold">Game & languages</h1>
@@ -110,13 +73,11 @@ export default function Home() {
       </header>
 
       {currentComponent ? (
-        <div className="flex-grow flex items-center justify-center p-4">
-          {renderComponent()}
-        </div>
+        <div className="flex-grow flex items-center justify-center p-4">{renderComponent()}</div>
       ) : (
         <main className="flex-grow flex flex-col items-center justify-center p-4">
           <h2 className="text-2xl font-bold text-center">Welcome User!</h2>
-          <p className="text-center text-gray-600 max-w-md mb-6 ">
+          <p className="text-center text-gray-600 max-w-md mb-6">
             Choose a game to play and improve your language skills.
           </p>
 
@@ -124,14 +85,10 @@ export default function Home() {
             <Card className="w-full">
               <CardHeader>
                 <CardTitle className="text-center">
-                  <span className="text-4xl mr-2">
-                    {cards[currentCardIndex].emoji}
-                  </span>
+                  <span className="text-4xl mr-2">{cards[currentCardIndex].emoji}</span>
                   {cards[currentCardIndex].title}
                 </CardTitle>
-                <CardDescription>
-                  {cards[currentCardIndex].description}
-                </CardDescription>
+                <CardDescription>{cards[currentCardIndex].description}</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="flex flex-wrap gap-2 mb-4">
@@ -144,20 +101,13 @@ export default function Home() {
                 <Button
                   className="w-full"
                   onClick={() =>
-                    setCurrentComponent(
-                      cards[currentCardIndex].component as
-                        | "chat"
-                        | "paris"
-                        | "terminal"
-                    )
+                    setCurrentComponent(cards[currentCardIndex].component as "chat" | "paris" | "terminal")
                   }
                 >
                   {cards[currentCardIndex].buttonText}
                 </Button>
               </CardContent>
-              <CardFooter className="text-sm text-gray-500 text-center">
-                Explore and learn with LangGenie
-              </CardFooter>
+              <CardFooter className="text-sm text-gray-500 text-center">Explore and learn with LangGenie</CardFooter>
             </Card>
             <Button
               variant="ghost"
@@ -167,8 +117,6 @@ export default function Home() {
             >
               <ChevronLeftIcon className="h-6 w-6" />
             </Button>
-            <Button variant="outline" onClick={() => setCurrentComponent("terminal")}>
-              ChatComponentTerminal
             <Button
               variant="ghost"
               size="icon"
@@ -180,9 +128,10 @@ export default function Home() {
           </div>
         </main>
       )}
+
       <footer className="w-full mt-10 py-4 px-4">
         <div className="flex flex-col items-center justify-center space-y-2 text-grey-600">
-          <p className="flex space-x-4 ">
+          <p className="flex space-x-4">
             <a
               href="https://github.com/lmangall/text_based_language_game"
               className="font-bold text-xs text-gray-600 hover:text-black"
