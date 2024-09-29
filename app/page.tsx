@@ -1,48 +1,70 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import ChatComponent from "@/components/ChatComponent";
 import DayInParis from "@/components/DayInParis";
 import ChatComponentTerminal from "@/components/ChatComponentTerminal";
 import { ChevronLeftIcon, ChevronRightIcon, MenuIcon } from "lucide-react";
 import { GitHubLogoIcon, MagicWandIcon } from "@radix-ui/react-icons";
+import { useInitData } from "@/components/useInitData";
+import { useState } from "react";
+
+type GameComponent = "chat" | "paris" | "terminal";
+
+interface GameCard {
+  emoji: string;
+  title: string;
+  description: string;
+  buttonText: string;
+  tags: string[];
+  component: GameComponent;
+}
+
+const cards: GameCard[] = [
+  {
+    emoji: "🗼",
+    title: "Go for a weekend in Paris",
+    description:
+      "You will land in Paris and have a fixed budget to spend your dream weekend. See the Eiffel tower, eat some macarons... ?",
+    buttonText: "Ratatouille",
+    tags: ["A1", "FR", "Bot"],
+    component: "paris",
+  },
+  {
+    emoji: "💼",
+    title: "Get your tech company funded",
+    description: "You're in the Berlin tech scene, hustling at hackathons.",
+    buttonText: "Start Pitching",
+    tags: ["A2", "DE", "Bot"],
+    component: "chat",
+  },
+  {
+    emoji: "💻",
+    title: "Code in the Terminal",
+    description: "Experience coding challenges in a terminal-like environment.",
+    buttonText: "Hello World",
+    tags: ["B1", "EN", "Bot"],
+    component: "terminal",
+  },
+];
 
 export default function Home() {
-  const [currentComponent, setCurrentComponent] = useState<"chat" | "paris" | "terminal" | null>(null);
+  const { initData, error, loading } = useInitData();
+  const [currentComponent, setCurrentComponent] =
+    useState<GameComponent | null>(null);
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
 
-  const cards = [
-    {
-      emoji: "🗼",
-      title: "Go for a weekend in Paris",
-      description:
-        "You will land in Paris and have a fixed budget to spend your dream weekend. See the Eiffel tower, eat some macarons... ?",
-      buttonText: "Ratatouille",
-      tags: ["A1", "FR", "Bot"],
-      component: "paris",
-    },
-    {
-      emoji: "💼",
-      title: "Get your tech company funded",
-      description: "You're in the Berlin tech scene, hustling at hackathons.",
-      buttonText: "Start Pitching",
-      tags: ["A2", "DE", "Bot"],
-      component: "chat",
-    },
-    {
-      emoji: "💻",
-      title: "Code in the Terminal",
-      description: "Experience coding challenges in a terminal-like environment.",
-      buttonText: "Hello World",
-      tags: ["B1", "EN", "Bot"],
-      component: "terminal",
-    },
-  ];
-
-  const renderComponent = () => {
+  const renderComponent = useCallback(() => {
     switch (currentComponent) {
       case "chat":
         return <ChatComponent />;
@@ -53,15 +75,29 @@ export default function Home() {
       default:
         return null;
     }
-  };
+  }, [currentComponent]);
 
-  const nextCard = () => {
+  const nextCard = useCallback(() => {
     setCurrentCardIndex((prevIndex) => (prevIndex + 1) % cards.length);
-  };
+  }, []);
 
-  const prevCard = () => {
-    setCurrentCardIndex((prevIndex) => (prevIndex - 1 + cards.length) % cards.length);
-  };
+  const prevCard = useCallback(() => {
+    setCurrentCardIndex(
+      (prevIndex) => (prevIndex - 1 + cards.length) % cards.length
+    );
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div>Loading...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    console.error("Error initializing app:", error);
+  }
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -73,10 +109,14 @@ export default function Home() {
       </header>
 
       {currentComponent ? (
-        <div className="flex-grow flex items-center justify-center p-4">{renderComponent()}</div>
+        <div className="flex-grow flex items-center justify-center p-4">
+          {renderComponent()}
+        </div>
       ) : (
         <main className="flex-grow flex flex-col items-center justify-center p-4">
-          <h2 className="text-2xl font-bold text-center">Welcome User!</h2>
+          <h2 className="text-2xl font-bold text-center">
+            Welcome {initData?.user?.first_name || "User"}!
+          </h2>
           <p className="text-center text-gray-600 max-w-md mb-6">
             Choose a game to play and improve your language skills.
           </p>
@@ -85,10 +125,14 @@ export default function Home() {
             <Card className="w-full">
               <CardHeader>
                 <CardTitle className="text-center">
-                  <span className="text-4xl mr-2">{cards[currentCardIndex].emoji}</span>
+                  <span className="text-4xl mr-2">
+                    {cards[currentCardIndex].emoji}
+                  </span>
                   {cards[currentCardIndex].title}
                 </CardTitle>
-                <CardDescription>{cards[currentCardIndex].description}</CardDescription>
+                <CardDescription>
+                  {cards[currentCardIndex].description}
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="flex flex-wrap gap-2 mb-4">
@@ -101,13 +145,15 @@ export default function Home() {
                 <Button
                   className="w-full"
                   onClick={() =>
-                    setCurrentComponent(cards[currentCardIndex].component as "chat" | "paris" | "terminal")
+                    setCurrentComponent(cards[currentCardIndex].component)
                   }
                 >
                   {cards[currentCardIndex].buttonText}
                 </Button>
               </CardContent>
-              <CardFooter className="text-sm text-gray-500 text-center">Explore and learn with LangGenie</CardFooter>
+              <CardFooter className="text-sm text-gray-500 text-center">
+                Explore and learn with LangGenie
+              </CardFooter>
             </Card>
             <Button
               variant="ghost"

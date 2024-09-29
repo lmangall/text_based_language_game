@@ -12,6 +12,8 @@
     "@mistralai/mistralai": "^1.1.0",
     "@radix-ui/react-icons": "^1.3.0",
     "@radix-ui/react-slot": "^1.1.0",
+    "@telegram-apps/sdk": "^1.1.3",
+    "@twa-dev/sdk": "github:twa-dev/sdk",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "deepl-node": "^1.14.0",
