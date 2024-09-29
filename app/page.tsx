@@ -18,6 +18,15 @@ import { ChevronLeftIcon, ChevronRightIcon, MenuIcon } from "lucide-react";
 import { GitHubLogoIcon, MagicWandIcon } from "@radix-ui/react-icons";
 import { useInitData } from "@/components/useInitData";
 import { useState } from "react";
+
+// Assuming you have these variables defined elsewhere in your code
+const targetLanguage = "German"; // Or dynamically get it from some state
+const languageLevel = "A1";
+const turnNumbers = 5;
+const userLanguage = "English";
+const aiRole = "investor";
+const userRole = "developer";
+const context = "seeking investment for my product";
 import { UserProvider } from "@/context/UserContext";
 
 type GameComponent = "chat" | "paris" | "terminal";
@@ -68,7 +77,17 @@ export default function Home() {
   const renderComponent = useCallback(() => {
     switch (currentComponent) {
       case "chat":
-        return <ChatComponent />;
+        return (
+          <ChatComponent
+            targetLanguage={targetLanguage}
+            languageLevel={languageLevel}
+            turnNumbers={turnNumbers}
+            userLanguage={userLanguage}
+            aiRole={aiRole}
+            userRole={userRole}
+            context={context}
+          />
+        );
       case "paris":
         return <DayInParis />;
       case "terminal":
