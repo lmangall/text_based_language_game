@@ -117,7 +117,7 @@ export default function Home() {
       ) : (
         <main className="flex-grow flex flex-col items-center justify-center p-4">
           <h2 className="text-2xl font-bold text-center">
-            Welcome {initData?.user?.first_name || "User"}!
+            Welcome {initData?.user?.firstName || "User"}!
           </h2>
           <p className="text-center text-gray-600 max-w-md mb-6">
             Choose a game to play and improve your language skills.

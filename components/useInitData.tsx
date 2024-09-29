@@ -28,7 +28,7 @@ export function useInitData() {
         setInitData({
           user: {
             id: 12345,
-            first_name: "John",
+            firstName: "John",
             last_name: "Doe",
             username: "johndoe",
             language_code: "en",

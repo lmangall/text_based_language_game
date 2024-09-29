@@ -1,7 +1,7 @@
 declare module "@telegram-apps/sdk" {
   interface User {
     id: number;
-    first_name: string;
+    firstName: string;
     last_name: string;
     username: string;
     language_code: string;
