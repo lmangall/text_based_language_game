@@ -24,12 +24,27 @@ const steps: { [key: string]: GameStep } = {
       {
         emoji: "❓",
         text: `Ask somebody: "Excusez-moi, où va le bus ?"`,
-        lose: true,
+        nextStep: "askAboutBus",
       },
       {
         emoji: "🚕",
         text: `Take a taxi: "Taxi! Les Champs Élysées, s'il vous plaît!"`,
-        lose: true,
+        nextStep: "taxi",
+      },
+    ],
+  },
+  askAboutBus: {
+    description: `Il va à Paris, ici c'est Beauvais, Paris est à une heure de route, 80km.\n\nWhat do you want to do next?`,
+    options: [
+      {
+        emoji: "🚌",
+        text: `Take the bus to Paris`,
+        nextStep: "busTicket",
+      },
+      {
+        emoji: "🚕",
+        text: `Take a taxi: "Taxi! Les Champs Élysées, s'il vous plaît!"`,
+        nextStep: "taxi",
       },
     ],
   },
@@ -47,6 +62,22 @@ const steps: { [key: string]: GameStep } = {
         nextStep: "metroChampsElysees",
       },
       { emoji: "🖼️", text: `Aller au Louvre`, nextStep: "metroLouvre" },
+    ],
+  },
+  taxi: {
+    description: `You took a taxi and paid €120 for the ride to Paris, ouch. Did you know it's 80km? Anyway now you have arrived.\n\nWhat do you do next?`,
+    options: [
+      {
+        emoji: "🥖",
+        text: `Je vais dans une boulangerie`,
+        nextStep: "bakery",
+      },
+      {
+        emoji: "🌳",
+        text: `Je vais aux Champs Élysées`,
+        nextStep: "metroChampsElysees",
+      },
+      { emoji: "🖼️", text: `Je vais au Louvre`, nextStep: "metroLouvre" },
     ],
   },
   bakery: {
@@ -128,7 +159,8 @@ const steps: { [key: string]: GameStep } = {
     ],
   },
   arriveChampsElysees: {
-    description: `You exit the station and find yourself on a beautiful, lively avenue with many shops and restaurants.`,
+    description: `You exit the station
+En sortant de la station de métro Champs Elysées Clémenceau, vous voyez une grande avenue avec beaucoup de magasins et de restaurants. Les arbres bordent la rue et il y a beaucoup de gens qui marchent. Vous voyez aussi des voitures et des bus qui passent. L'avenue est très belle et animée.`,
     options: [],
   },
   metroLouvre: {
@@ -137,13 +169,16 @@ const steps: { [key: string]: GameStep } = {
       { emoji: "✔️", text: `Follow their advice`, nextStep: "arriveLouvre" },
       {
         emoji: "🛑",
-        text: `Ignore their advice and go the wrong way`,
-        lose: true,
+        text: `You think he’s wrong and at Champs Elysées Clémenceau you go direction La Défense to go out at Louvre Rivoli.`,
       },
     ],
   },
   arriveLouvre: {
-    description: `You arrive at a beautiful square filled with tourists, historic buildings, and monuments.`,
+    description: `You do as he says, En sortant de la station de métro Louvre-Rivoli, vous voyez une grande place avec beaucoup de touristes. Il y a des magasins et des cafés autour de la place. Vous voyez aussi des bâtiments historiques et des statues. Les gens prennent des photos et admirent les monuments. La place est très belle et animée.`,
+    options: [],
+  },
+  loseForWrongDirection: {
+    description: `Sorry, you had to go direction Vincennes in order to go out at Louvre Rivoli, you lost the game. You better not go to Paris if you can’t navigate the metro`,
     options: [],
   },
   loseForStealing: {
@@ -167,17 +202,19 @@ const DayInParis: React.FC = () => {
     }
   };
 
+  const handleRestart = () => {
+    setCurrentStep("start");
+  };
+
   const renderOptions = (options: GameOption[]) => {
     return options.map((option, index) => (
       <div key={index} className="flex items-center my-2">
-        {/* Emoji button triggers the option */}
         <button
           onClick={() => handleOptionClick(option)}
           className="text-left bg-transparent border-none cursor-pointer text-xl mr-3"
         >
           {option.emoji}
         </button>
-        {/* Text is not clickable */}
         <span className="italic">{option.text}</span>
       </div>
     ));
@@ -197,7 +234,15 @@ const DayInParis: React.FC = () => {
       {steps[currentStep].options.length > 0 ? (
         <div>{renderOptions(steps[currentStep].options)}</div>
       ) : (
-        <p className="text-lg">Game Over</p>
+        <div>
+          <p className="text-lg">Game Over</p>
+          <button
+            onClick={handleRestart}
+            className="mt-4 bg-blue-500 text-white py-2 px-4 rounded"
+          >
+            Restart Game
+          </button>
+        </div>
       )}
     </div>
   );

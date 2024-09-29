@@ -5,7 +5,6 @@ import ChatComponent from "@/components/ChatComponent";
 import DayInParis from "@/components/DayInParis";
 import ChatComponentTerminal from "@/components/ChatComponentTerminal";
 import useDeeplTranslate from "@/components/UseDeeplTranslate";
-import Terminal from "@/components/Terminal"; // Assuming Terminal is another component you want to use
 
 export default function Home() {
   const [currentComponent, setCurrentComponent] = useState<
