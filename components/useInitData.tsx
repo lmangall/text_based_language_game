@@ -7,9 +7,11 @@ export function useInitData() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const initApp = () => {
+    const initApp = async () => {
       try {
+        console.log("Attempting to initialize app...");
         const data = initInitData();
+        console.log("Initial Data:", data);
         if (data) {
           setInitData(data);
         } else {
@@ -20,7 +22,6 @@ export function useInitData() {
         setError(
           "Unable to initialize app. Please ensure you're running this in Telegram."
         );
-        // Set mock data for development
         setInitData({
           user: {
             id: 12345,
