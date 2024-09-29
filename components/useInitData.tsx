@@ -11,8 +11,12 @@ export function useInitData() {
       try {
         console.log("Attempting to initialize app...");
         const data = initInitData();
-        console.log("Initial Data:", data);
-        if (data) {
+        console.log("Initial Data:", data); // Debugging statement
+
+        // Check if the data has a nested initData property
+        if (data && data.initData) {
+          setInitData(data.initData);
+        } else if (data) {
           setInitData(data);
         } else {
           throw new Error("InitData is undefined");
