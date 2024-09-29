@@ -12,10 +12,11 @@ declare module "@telegram-apps/sdk" {
   interface InitData {
     user: User;
     hash: string;
-    auth_date: string;
+    auth_date: Date; // Updated to Date
     start_param: string;
     chat_type: string;
     chat_instance: string;
+    query_id: string; // Added missing property
   }
 
   function initInitData(): InitData | null;

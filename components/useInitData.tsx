@@ -7,11 +7,11 @@ export function useInitData() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const initApp = async () => {
+    const initApp = () => {
       try {
         console.log("Attempting to initialize app...");
         const data = initInitData();
-        console.log("Initial Data:", data);
+        console.log("Initial Data:", data); // Debugging statement
         if (data) {
           setInitData(data);
         } else {
@@ -22,6 +22,7 @@ export function useInitData() {
         setError(
           "Unable to initialize app. Please ensure you're running this in Telegram."
         );
+        // Set mock data for development
         setInitData({
           user: {
             id: 12345,
@@ -31,10 +32,11 @@ export function useInitData() {
             language_code: "en",
           },
           hash: "mock_hash",
-          auth_date: "mock_auth_date",
+          auth_date: new Date(), // Updated to Date
           start_param: "mock_start_param",
           chat_type: "mock_chat_type",
           chat_instance: "mock_chat_instance",
+          query_id: "mock_query_id", // Added missing property
         });
       } finally {
         setLoading(false);
