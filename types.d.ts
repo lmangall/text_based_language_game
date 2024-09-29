@@ -22,7 +22,7 @@ declare module "@telegram-apps/sdk" {
   interface TelegramInitData {
     initData: InitData;
   }
-
+  //x
   function initInitData(): TelegramInitData | null;
   function parseInitData(initDataRaw: string): InitData;
   function mockTelegramEnv(env: {
