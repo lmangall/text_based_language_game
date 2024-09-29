@@ -16,8 +16,6 @@ export function useInitData() {
         // Check if the data has a nested initData property
         if (data && data.initData) {
           setInitData(data.initData);
-        } else if (data) {
-          setInitData(data);
         } else {
           throw new Error("InitData is undefined");
         }

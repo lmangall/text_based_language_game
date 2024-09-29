@@ -19,7 +19,11 @@ declare module "@telegram-apps/sdk" {
     query_id: string;
   }
 
-  function initInitData(): InitData | null;
+  interface TelegramInitData {
+    initData: InitData;
+  }
+
+  function initInitData(): TelegramInitData | null;
   function parseInitData(initDataRaw: string): InitData;
   function mockTelegramEnv(env: {
     themeParams: any;
