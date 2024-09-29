@@ -11,9 +11,9 @@ export function useInitData() {
       try {
         console.log("Attempting to initialize app...");
         const data = initInitData();
-        console.log("Initial Data:", data); // Debugging statement
-        if (data && data.initData) {
-          setInitData(data.initData);
+        console.log("Initial Data:", data);
+        if (data) {
+          setInitData(data);
         } else {
           throw new Error("InitData is undefined");
         }
@@ -32,11 +32,11 @@ export function useInitData() {
             language_code: "en",
           },
           hash: "mock_hash",
-          auth_date: new Date(), // Updated to Date
+          auth_date: new Date(),
           start_param: "mock_start_param",
           chat_type: "mock_chat_type",
           chat_instance: "mock_chat_instance",
-          query_id: "mock_query_id", // Added missing property
+          query_id: "mock_query_id",
         });
       } finally {
         setLoading(false);
