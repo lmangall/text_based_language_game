@@ -6,9 +6,13 @@ const UserContext = createContext();
 export const UserProvider = ({ children }) => {
   const { initData, error, loading } = useInitData();
   const [userData, setUserData] = useState(null);
-  const [targetLanguage, setTargetLanguage] = useState("FR"); // Hardcoded for now
-  const [level, setLevel] = useState("A1"); // Hardcoded for now
-  const [name, setName] = useState("John Doe"); // Hardcoded for now
+  const [name, setName] = useState("");
+  const [city, setCity] = useState("");
+  const [gender, setGender] = useState("");
+  const [targetLanguage, setTargetLanguage] = useState("");
+  const [languageLevel, setLanguageLevel] = useState("");
+  const [interests, setInterests] = useState([]);
+  const [preferencesSet, setPreferencesSet] = useState(false);
 
   useEffect(() => {
     if (initData) {
@@ -32,12 +36,20 @@ export const UserProvider = ({ children }) => {
     <UserContext.Provider
       value={{
         userData,
-        targetLanguage,
-        setTargetLanguage,
-        level,
-        setLevel,
         name,
         setName,
+        city,
+        setCity,
+        gender,
+        setGender,
+        targetLanguage,
+        setTargetLanguage,
+        languageLevel,
+        setLanguageLevel,
+        interests,
+        setInterests,
+        preferencesSet,
+        setPreferencesSet,
       }}
     >
       {children}
