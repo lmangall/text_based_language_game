@@ -8,8 +8,6 @@ const translationsMap: { [key: string]: string } = {
   "Excusez-moi": "Excuse me",
   "où va": "where does",
   "le bus": "the bus go",
-  "Les Champs": "the Champs",
-  "Élysées": "Elysées",
   "Il va": "It goes",
   "à Paris": "to Paris",
   "ici c'est": "this is",
@@ -19,14 +17,12 @@ const translationsMap: { [key: string]: string } = {
   "heure de": "away",
   "route": "route",
   "Quinze euros": "Fifteen euros",
-  "s’il vous": "please",
-  "Je vais": "I am",
-  "dans une": "going to",
-  "boulangerie": "bakery",
+  "s’il vous plaît": "please",
+  "Je vais": "I am going",
+  "dans une boulangerie": "to a bakery",
   "Aller à": "Go to",
   "la première": "the first",
   "Aller aux": "Go to the",
-  "Champs Élysées": "Champs Élysées",
   "Aller au": "Go to the",
   "Louvre": "Louvre",
   "Ça fera": "That will be",
@@ -34,26 +30,51 @@ const translationsMap: { [key: string]: string } = {
   "cinquante": "fifty",
   "Sortir sans": "Leave without",
   "payer": "pay",
-  "Je ne": "I do not",
-  "parle pas": "not speak",
+  "ne parle pas": "not speak",
   "français": "French",
-  "café? croissant?": "coffee? croissant?",
+  "café?": "coffee?",
+  "croissant?": "croissant?",
   "Bien sûr,": "Of course,",
   "Monsieur/Madame": "Sir/Madam",
-  "Prenez la": "Take line",
-  "ligne 13": "13 towards",
+  "Prenez": "Take",
+  "la ligne 13": "the line 13",
   "direction": "towards",
   "changez à": "change at",
-  "Clémenceau": "Clémenceau",
-  "descendez à": "get off",
+  "descendez": "get off",
   "Louvre Rivoli": "at Louvre Rivoli",
-  "Sorry, you": "Désolé, vous",
-  "lost the": "avez perdu",
-  "game": "le jeu",
-  "In Saint": "À Saint",
-  "Denis, stealing": "Denis, voler",
+  "stealing": "voler",
   "from bakers": "des boulangers",
   "is common": "est courant"
+  "vous voyez": "you see",
+  "une grande avenue": "a large avenue",
+  "beaucoup de magasins": "many shops",
+  "et de restaurants": "and restaurants",
+  "Les arbres": "The trees",
+  "bordent la rue": "line the street",
+  "il y a": "there are",
+  "beaucoup de gens": "many people",
+  "qui marchent": "who are walking",
+  "des voitures": "cars",
+  "et des bus": "and buses",
+  "qui passent": "that pass",
+  "L'avenue est": "The avenue is",
+  "très belle": "very beautiful (♀️)",
+  "et animée": "and lively",
+  "En sortant de la station de métro": "Upon exiting the metro station",
+  "Champs Élysées Clémenceau": "Champs Élysées Clémenceau",
+  "une grande place": "a large square",
+  "beaucoup de touristes": "many tourists",
+  "Il y a": "There are",
+  "des magasins": "shops",
+  "et des cafés": "and cafes",
+  "autour de la place": "around the square",
+  "des bâtiments historiques": "historic buildings",
+  "et des statues": "and statues",
+  "Les gens": "People",
+  "prennent des photos": "are taking photos",
+  "et admirent": "and admiring",
+  "les monuments": "the monuments",
+  "La place est": "The square is",
 };
 
 interface GameOption {
@@ -292,26 +313,9 @@ const DayInParis: React.FC = () => {
           <span
             key={`cluster-${index}`}
             onClick={() => handleClusterClick(cluster)}
-            className="inline-block cursor-pointer text-blue-600 underline relative"
+            className="inline-block cursor-pointer"
           >
-            <span
-              className={`transition-all duration-300 ease-in-out ${
-                translatedClusters[cluster]
-                  ? "opacity-0 scale-75"
-                  : "opacity-100 scale-100"
-              }`}
-            >
-              {cluster}
-            </span>
-            <span
-              className={`absolute left-0 transition-all duration-300 ease-in-out ${
-                translatedClusters[cluster]
-                  ? "opacity-100 scale-100"
-                  : "opacity-0 scale-75"
-              }`}
-            >
-              {translationsMap[cluster]}
-            </span>
+            {translatedClusters[cluster] ? translationsMap[cluster] : cluster}
           </span>
         );
         lastIndex = startIndex + cluster.length;
