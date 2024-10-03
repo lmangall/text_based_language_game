@@ -1,5 +1,60 @@
 import React, { useState } from "react";
-import useDeeplTranslate from "@/components/UseDeeplTranslate";
+
+// prettier-ignore
+
+const translationsMap: { [key: string]: string } = {
+  "un billet": "a ticket",
+  "s'il vous plaît": "please",
+  "Excusez-moi": "Excuse me",
+  "où va": "where does",
+  "le bus": "the bus go",
+  "Les Champs": "the Champs",
+  "Élysées": "Elysées",
+  "Il va": "It goes",
+  "à Paris": "to Paris",
+  "ici c'est": "this is",
+  "Beauvais": "Beauvais",
+  "Paris est": "Paris is",
+  "à une": "an hour",
+  "heure de": "away",
+  "route": "route",
+  "Quinze euros": "Fifteen euros",
+  "s’il vous": "please",
+  "Je vais": "I am",
+  "dans une": "going to",
+  "boulangerie": "bakery",
+  "Aller à": "Go to",
+  "la première": "the first",
+  "Aller aux": "Go to the",
+  "Champs Élysées": "Champs Élysées",
+  "Aller au": "Go to the",
+  "Louvre": "Louvre",
+  "Ça fera": "That will be",
+  "trois euros": "three euros",
+  "cinquante": "fifty",
+  "Sortir sans": "Leave without",
+  "payer": "pay",
+  "Je ne": "I do not",
+  "parle pas": "not speak",
+  "français": "French",
+  "café? croissant?": "coffee? croissant?",
+  "Bien sûr,": "Of course,",
+  "Monsieur/Madame": "Sir/Madam",
+  "Prenez la": "Take line",
+  "ligne 13": "13 towards",
+  "direction": "towards",
+  "changez à": "change at",
+  "Clémenceau": "Clémenceau",
+  "descendez à": "get off",
+  "Louvre Rivoli": "at Louvre Rivoli",
+  "Sorry, you": "Désolé, vous",
+  "lost the": "avez perdu",
+  "game": "le jeu",
+  "In Saint": "À Saint",
+  "Denis, stealing": "Denis, voler",
+  "from bakers": "des boulangers",
+  "is common": "est courant"
+};
 
 interface GameOption {
   emoji: string;
@@ -19,7 +74,7 @@ const steps: { [key: string]: GameStep } = {
     options: [
       {
         emoji: "🚌",
-        text: `Go to the bus driver: "Bonjour, un billet pour Paris, s'il vous plait"`,
+        text: `Go to the bus driver: "Bonjour, un billet pour Paris, s'il vous plaît"`,
         nextStep: "busTicket",
       },
       {
@@ -160,8 +215,7 @@ const steps: { [key: string]: GameStep } = {
     ],
   },
   arriveChampsElysees: {
-    description: `You exit the station
-En sortant de la station de métro Champs Elysées Clémenceau, vous voyez une grande avenue avec beaucoup de magasins et de restaurants. Les arbres bordent la rue et il y a beaucoup de gens qui marchent. Vous voyez aussi des voitures et des bus qui passent. L'avenue est très belle et animée.`,
+    description: `You exit the station. En sortant de la station de métro Champs Elysées Clémenceau, vous voyez une grande avenue avec beaucoup de magasins et de restaurants. Les arbres bordent la rue et il y a beaucoup de gens qui marchent. Vous voyez aussi des voitures et des bus qui passent. L'avenue est très belle et animée.`,
     options: [],
   },
   metroLouvre: {
@@ -171,6 +225,7 @@ En sortant de la station de métro Champs Elysées Clémenceau, vous voyez une g
       {
         emoji: "🛑",
         text: `You think he’s wrong and at Champs Elysées Clémenceau you go direction La Défense to go out at Louvre Rivoli.`,
+        lose: true,
       },
     ],
   },
@@ -191,10 +246,11 @@ En sortant de la station de métro Champs Elysées Clémenceau, vous voyez une g
     options: [],
   },
 };
-
 const DayInParis: React.FC = () => {
   const [currentStep, setCurrentStep] = useState<string>("start");
-  const { translateText, translations, translationError } = useDeeplTranslate();
+  const [translatedClusters, setTranslatedClusters] = useState<{
+    [key: string]: boolean;
+  }>({});
 
   const handleOptionClick = (option: GameOption) => {
     if (option.lose) {
@@ -206,33 +262,76 @@ const DayInParis: React.FC = () => {
 
   const handleRestart = () => {
     setCurrentStep("start");
+    setTranslatedClusters({});
   };
 
-  const handleWordClick = async (word: string) => {
-    try {
-      await translateText(word);
-    } catch (error) {
-      console.error("Translation error:", error);
+  const handleClusterClick = (cluster: string) => {
+    setTranslatedClusters((prev) => ({
+      ...prev,
+      [cluster]: !prev[cluster],
+    }));
+  };
+
+  const makeClustersClickable = (sentence: string, clusters: string[]) => {
+    let modifiedSentence: JSX.Element[] = [];
+    let lastIndex = 0;
+
+    clusters.forEach((cluster, index) => {
+      const startIndex = sentence.indexOf(cluster, lastIndex);
+      if (startIndex !== -1) {
+        // Add text before the cluster
+        if (startIndex > lastIndex) {
+          modifiedSentence.push(
+            <span key={`text-${index}`}>
+              {sentence.slice(lastIndex, startIndex)}
+            </span>
+          );
+        }
+        // Add the clickable cluster
+        modifiedSentence.push(
+          <span
+            key={`cluster-${index}`}
+            onClick={() => handleClusterClick(cluster)}
+            className="inline-block cursor-pointer text-blue-600 underline relative"
+          >
+            <span
+              className={`transition-all duration-300 ease-in-out ${
+                translatedClusters[cluster]
+                  ? "opacity-0 scale-75"
+                  : "opacity-100 scale-100"
+              }`}
+            >
+              {cluster}
+            </span>
+            <span
+              className={`absolute left-0 transition-all duration-300 ease-in-out ${
+                translatedClusters[cluster]
+                  ? "opacity-100 scale-100"
+                  : "opacity-0 scale-75"
+              }`}
+            >
+              {translationsMap[cluster]}
+            </span>
+          </span>
+        );
+        lastIndex = startIndex + cluster.length;
+      }
+    });
+
+    // Add any remaining text after the last cluster
+    if (lastIndex < sentence.length) {
+      modifiedSentence.push(
+        <span key="remaining-text">{sentence.slice(lastIndex)}</span>
+      );
     }
-  };
 
-  // Helper to make any text clickable for translation
-  const makeTextClickable = (text: string) => {
-    return text.split(" ").map((word, index) => (
-      <span
-        key={index}
-        onClick={() => handleWordClick(word)}
-        className="inline cursor-pointer" // No underline, but clickable
-      >
-        {word}{" "}
-      </span>
-    ));
+    return modifiedSentence;
   };
 
   const renderDescription = (description: string) => {
     return description.split("\n").map((line, index) => (
       <p key={index} className="my-4">
-        {makeTextClickable(line)}
+        {makeClustersClickable(line, Object.keys(translationsMap))}
       </p>
     ));
   };
@@ -246,49 +345,31 @@ const DayInParis: React.FC = () => {
         >
           {option.emoji}
         </button>
-        <span className="italic cursor-pointer">
-          {makeTextClickable(option.text)}
+        <span className="italic">
+          {makeClustersClickable(option.text, Object.keys(translationsMap))}
         </span>
       </div>
     ));
   };
 
   return (
-    <div className="font-sans p-5">
-      <div className="description">
+    <div className="font-sans p-5 max-w-2xl mx-auto">
+      <div className="description text-lg">
         {renderDescription(steps[currentStep].description)}
       </div>
       {steps[currentStep].options.length > 0 ? (
-        <div>{renderOptions(steps[currentStep].options)}</div>
+        <div className="mt-6">{renderOptions(steps[currentStep].options)}</div>
       ) : (
-        <div>
-          <p className="text-lg">Game Over</p>
+        <div className="mt-6">
+          <p className="text-xl font-bold">Game Over</p>
           <button
             onClick={handleRestart}
-            className="mt-4 bg-blue-500 text-white py-2 px-4 rounded"
+            className="mt-4 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition-colors duration-200"
           >
             Restart Game
           </button>
         </div>
       )}
-      {/* Render translations here */}
-      {translations.length > 0 && (
-        <div className="mt-4 w-full">
-          <h2 className="font-bold">Translations:</h2>
-          <ul className="list-disc pl-5">
-            {translations.map((translation, index) => (
-              <li
-                key={index}
-                dangerouslySetInnerHTML={{ __html: translation }}
-              />
-            ))}
-          </ul>
-          {translationError && (
-            <p className="text-red-500">{translationError}</p>
-          )}
-        </div>
-      )}
-      {translationError && <p className="text-red-500">{translationError}</p>}
     </div>
   );
 };
