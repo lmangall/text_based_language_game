@@ -44,7 +44,7 @@ const translationsMap: { [key: string]: string } = {
   "Louvre Rivoli": "at Louvre Rivoli",
   "stealing": "voler",
   "from bakers": "des boulangers",
-  "is common": "est courant"
+  "is common": "est courant",
   "vous voyez": "you see",
   "une grande avenue": "a large avenue",
   "beaucoup de magasins": "many shops",
@@ -60,7 +60,7 @@ const translationsMap: { [key: string]: string } = {
   "L'avenue est": "The avenue is",
   "très belle": "very beautiful (♀️)",
   "et animée": "and lively",
-  "En sortant de la station de métro": "Upon exiting the metro station",
+  "En sortant": "Upon exiting",
   "Champs Élysées Clémenceau": "Champs Élysées Clémenceau",
   "une grande place": "a large square",
   "beaucoup de touristes": "many tourists",
